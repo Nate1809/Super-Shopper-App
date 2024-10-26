@@ -14,13 +14,12 @@ struct StoreSection: Identifiable, Hashable {
     let name: String
     let position: (x: Int, y: Int)
     let category: String
-
+    
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
-
+    
     static func == (lhs: StoreSection, rhs: StoreSection) -> Bool {
         return lhs.id == rhs.id
     }
 }
-

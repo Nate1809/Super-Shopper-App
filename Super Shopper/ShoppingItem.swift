@@ -10,7 +10,7 @@
 import Foundation
 
 class ShoppingItem: Identifiable, ObservableObject, Equatable {
-    var id = UUID()
+    let id = UUID()
     @Published var name: String
     @Published var quantity: Int
     
@@ -19,7 +19,6 @@ class ShoppingItem: Identifiable, ObservableObject, Equatable {
         self.quantity = quantity
     }
     
-    // Implement the Equatable protocol
     static func == (lhs: ShoppingItem, rhs: ShoppingItem) -> Bool {
         return lhs.id == rhs.id
     }

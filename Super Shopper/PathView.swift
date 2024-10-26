@@ -15,7 +15,7 @@ struct PathView: View {
     var selectedStore: String
     @State private var pathSections: [StoreSection] = []
     @State private var sectionItemsMapping: [StoreSection: [ShoppingItem]] = [:]
-
+    
     var body: some View {
         List {
             ForEach(pathSections) { section in
@@ -39,13 +39,13 @@ struct PathView: View {
             calculatePath()
         }
     }
-
-    func calculatePath() {
+    
+    private func calculatePath() {
         let storeSections = StoreLayout.layout(for: selectedStore)
         let neededCategories = Set(categorizedItems.keys)
         let neededSections = storeSections.filter { neededCategories.contains($0.category) }
         pathSections = neededSections.sorted { $0.position.x < $1.position.x }
-
+        
         // Map each section to its items
         for section in pathSections {
             if let items = categorizedItems[section.category] {

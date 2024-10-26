@@ -17,7 +17,7 @@ struct CategorizedListView: View {
     @State private var showCategoryPicker: Bool = false
     @State private var selectedItem: ShoppingItem?
     @State private var categoriesList: [String] = []
-
+    
     var body: some View {
         VStack {
             List {
@@ -38,7 +38,7 @@ struct CategorizedListView: View {
                     }
                 }
             }
-
+            
             NavigationLink(destination: PathView(
                 categorizedItems: categorizedItems,
                 selectedStore: selectedStore
@@ -64,8 +64,8 @@ struct CategorizedListView: View {
             )
         }
     }
-
-    func categorizeItems() {
+    
+    private func categorizeItems() {
         let categories = [
             "Produce": ["apple", "banana", "carrot", "lettuce"],
             "Dairy": ["milk", "cheese", "yogurt"],
@@ -75,13 +75,13 @@ struct CategorizedListView: View {
             "Cleaning Supplies": ["detergent", "bleach", "soap"],
             "Beauty": ["shampoo", "conditioner", "toothpaste"]
         ]
-
+        
         var tempCategorizedItems: [String: [ShoppingItem]] = [:]
-
+        
         for item in shoppingItems {
             var foundCategory = false
             let lowercasedItemName = item.name.lowercased()
-
+            
             for (category, keywords) in categories {
                 if keywords.contains(where: { lowercasedItemName.contains($0) }) {
                     tempCategorizedItems[category, default: []].append(item)
@@ -89,37 +89,37 @@ struct CategorizedListView: View {
                     break
                 }
             }
-
+            
             if !foundCategory {
                 tempCategorizedItems["Other", default: []].append(item)
             }
         }
-
+        
         self.categorizedItems = tempCategorizedItems
     }
-
-    func getAllCategories() -> Set<String> {
+    
+    private func getAllCategories() -> Set<String> {
         let predefinedCategories = [
             "Produce", "Dairy", "Bakery", "Meat", "Seafood", "Cleaning Supplies", "Beauty"
         ]
         let otherCategories = categorizedItems.keys
         return Set(predefinedCategories).union(otherCategories)
     }
-
-    func categoryActionSheetButtons() -> [ActionSheet.Button] {
+    
+    private func categoryActionSheetButtons() -> [ActionSheet.Button] {
         var buttons: [ActionSheet.Button] = []
-
+        
         for category in categoriesList {
             buttons.append(.default(Text(category)) {
                 reassignItem(to: category)
             })
         }
-
+        
         buttons.append(.cancel())
         return buttons
     }
-
-    func reassignItem(to newCategory: String) {
+    
+    private func reassignItem(to newCategory: String) {
         guard let item = selectedItem else { return }
         
         // Remove from current category

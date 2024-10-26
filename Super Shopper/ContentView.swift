@@ -10,16 +10,16 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var shoppingItems: [ShoppingItem] = []
+    @ObservedObject var shoppingList = ShoppingList()
     @State private var selectedStore: String = "Target"
-
+    
     var body: some View {
         NavigationView {
             VStack(alignment: .leading) {
                 Text("Select Your Store:")
                     .font(.headline)
                     .padding(.bottom, 5)
-
+                
                 Picker("Store", selection: $selectedStore) {
                     Text("Target").tag("Target")
                     Text("Whole Foods").tag("Whole Foods")
@@ -28,17 +28,17 @@ struct ContentView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.bottom, 20)
-
+                
                 Text("Your Shopping List:")
                     .font(.headline)
                     .padding(.bottom, 5)
-
+                
                 List {
-                    ForEach(shoppingItems) { item in
+                    ForEach(shoppingList.items) { item in
                         ShoppingItemRow(item: item)
                     }
                     .onDelete(perform: deleteItems)
-
+                    
                     Button(action: addItem) {
                         HStack {
                             Image(systemName: "plus.circle.fill")
@@ -47,36 +47,41 @@ struct ContentView: View {
                         }
                     }
                 }
-
+                
                 NavigationLink(destination: CategorizedListView(
-                    shoppingItems: shoppingItems,
+                    shoppingItems: shoppingList.items,
                     selectedStore: selectedStore
                 )) {
                     Text("Categorize Items")
                         .foregroundColor(.white)
                         .padding()
-                        .background(Color.blue)
+                        .background(canProceed ? Color.blue : Color.gray)
                         .cornerRadius(8)
                 }
                 .padding(.top)
-
+                .disabled(!canProceed)
+                
                 Spacer()
             }
             .padding()
             .navigationTitle("Super Shopper")
         }
     }
-
-    func addItem() {
+    
+    private func addItem() {
         let newItem = ShoppingItem(name: "", quantity: 1)
-        shoppingItems.append(newItem)
+        shoppingList.items.append(newItem)
     }
-
-    func deleteItems(at offsets: IndexSet) {
-        shoppingItems.remove(atOffsets: offsets)
+    
+    private func deleteItems(at offsets: IndexSet) {
+        shoppingList.items.remove(atOffsets: offsets)
+    }
+    
+    // Computed property to check if we can proceed
+    private var canProceed: Bool {
+        !shoppingList.items.isEmpty && shoppingList.items.allSatisfy { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }
     }
 }
-
 
 #Preview {
     ContentView()
