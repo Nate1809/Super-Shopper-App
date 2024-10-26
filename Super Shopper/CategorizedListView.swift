@@ -121,7 +121,7 @@ struct CategorizedListView: View {
 
     func reassignItem(to newCategory: String) {
         guard let item = selectedItem else { return }
-
+        
         // Remove from current category
         for (category, items) in categorizedItems {
             if let index = items.firstIndex(of: item) {
@@ -129,7 +129,7 @@ struct CategorizedListView: View {
                 break
             }
         }
-
+        
         // Add to new category
         categorizedItems[newCategory, default: []].append(item)
     }

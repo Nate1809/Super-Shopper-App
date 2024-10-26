@@ -5,7 +5,6 @@
 //  Created by Nathan Guzman on 10/25/24.
 //
 
-
 // ContentView.swift
 
 import SwiftUI
@@ -13,7 +12,6 @@ import SwiftUI
 struct ContentView: View {
     @State private var shoppingItems: [ShoppingItem] = []
     @State private var selectedStore: String = "Target"
-    @FocusState private var focusedField: UUID?
 
     var body: some View {
         NavigationView {
@@ -36,15 +34,8 @@ struct ContentView: View {
                     .padding(.bottom, 5)
 
                 List {
-                    ForEach($shoppingItems) { $item in
-                        HStack {
-                            TextField("Item Name", text: $item.name)
-                                .focused($focusedField, equals: item.id)
-                            Spacer()
-                            TextField("Qty", value: $item.quantity, formatter: NumberFormatter.integer)
-                                .keyboardType(.numberPad)
-                                .frame(width: 50)
-                        }
+                    ForEach(shoppingItems) { item in
+                        ShoppingItemRow(item: item)
                     }
                     .onDelete(perform: deleteItems)
 
@@ -79,7 +70,6 @@ struct ContentView: View {
     func addItem() {
         let newItem = ShoppingItem(name: "", quantity: 1)
         shoppingItems.append(newItem)
-        focusedField = newItem.id
     }
 
     func deleteItems(at offsets: IndexSet) {
