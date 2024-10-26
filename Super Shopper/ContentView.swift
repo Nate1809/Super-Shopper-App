@@ -43,9 +43,8 @@ struct ContentView: View {
                         TextField("Item Name", text: $newItemName)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .focused($isItemNameFocused)
-                            .onSubmit {
-                                addItem()
-                            }
+                            .submitLabel(.done) // Optional: Change the return key label
+
                         Button(action: {
                             addItem()
                         }) {
@@ -56,6 +55,7 @@ struct ContentView: View {
                                 .background(Color.green)
                                 .cornerRadius(8)
                         }
+                        .disabled(newItemName.trimmingCharacters(in: .whitespaces).isEmpty) // Disable button if input is empty
                     }
                     .padding()
                 }
@@ -80,6 +80,7 @@ struct ContentView: View {
         }
     }
 
+    /// Adds a new item to the shopping list
     func addItem() {
         let trimmedName = newItemName.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty else { return }
@@ -90,6 +91,7 @@ struct ContentView: View {
         isItemNameFocused = true
     }
 
+    /// Deletes items from the shopping list
     func deleteItems(at offsets: IndexSet) {
         shoppingItems.remove(atOffsets: offsets)
     }
