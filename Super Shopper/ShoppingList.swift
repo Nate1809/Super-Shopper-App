@@ -1,10 +1,3 @@
-//
-//  ShoppingList.swift
-//  Super Shopper
-//
-//  Created by Nathan Guzman on 10/26/24.
-//
-
 // ShoppingList.swift
 
 import Foundation

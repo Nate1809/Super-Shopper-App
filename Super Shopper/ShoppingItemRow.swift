@@ -1,50 +1,47 @@
-//
-//  ShoppingItemRow.swift
-//  Super Shopper
-//
-//  Created by Nathan Guzman on 10/25/24.
-//
-
 // ShoppingItemRow.swift
 
 import SwiftUI
 
 struct ShoppingItemRow: View {
     @ObservedObject var item: ShoppingItem
-    @FocusState private var isFocused: Bool
-    
+    @FocusState private var isNameFocused: Bool
+    @FocusState private var isQuantityFocused: Bool
+
     var body: some View {
         HStack {
             TextField("Item Name", text: $item.name)
-                .focused($isFocused)
+                .focused($isNameFocused)
                 .onSubmit {
-                    validateName()
+                    validateItemName()
                 }
             Spacer()
             TextField("Qty", value: $item.quantity, formatter: NumberFormatter.integer)
                 .keyboardType(.numberPad)
                 .frame(width: 50)
+                .multilineTextAlignment(.center)
+                .focused($isQuantityFocused)
                 .onSubmit {
                     validateQuantity()
                 }
         }
+        .padding(.vertical, 4)
         .onAppear {
+            // Optionally, focus the name field when the item is empty
             if item.name.isEmpty {
-                isFocused = true
+                isNameFocused = true
             }
         }
     }
-    
-    // Input validation methods
-    private func validateName() {
+
+    func validateItemName() {
         item.name = item.name.trimmingCharacters(in: .whitespaces)
         if item.name.isEmpty {
             item.name = "Unnamed Item"
         }
     }
-    
-    private func validateQuantity() {
-        if item.quantity <= 0 {
+
+    func validateQuantity() {
+        if item.quantity < 1 {
             item.quantity = 1
         }
     }

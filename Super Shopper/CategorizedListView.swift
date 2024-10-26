@@ -1,11 +1,3 @@
-//
-//  CategorizedListView.swift
-//  Super Shopper
-//
-//  Created by Nathan Guzman on 10/25/24.
-//
-
-
 // CategorizedListView.swift
 
 import SwiftUI
@@ -38,6 +30,7 @@ struct CategorizedListView: View {
                     }
                 }
             }
+            .listStyle(InsetGroupedListStyle())
             
             NavigationLink(destination: PathView(
                 categorizedItems: categorizedItems,
@@ -45,6 +38,7 @@ struct CategorizedListView: View {
             )) {
                 Text("Show Optimal Path")
                     .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.green)
                     .cornerRadius(8)
@@ -65,7 +59,8 @@ struct CategorizedListView: View {
         }
     }
     
-    private func categorizeItems() {
+    // Categorize Items Function
+    func categorizeItems() {
         let categories = [
             "Produce": ["apple", "banana", "carrot", "lettuce"],
             "Dairy": ["milk", "cheese", "yogurt"],
@@ -98,7 +93,8 @@ struct CategorizedListView: View {
         self.categorizedItems = tempCategorizedItems
     }
     
-    private func getAllCategories() -> Set<String> {
+    // Get All Categories Function
+    func getAllCategories() -> Set<String> {
         let predefinedCategories = [
             "Produce", "Dairy", "Bakery", "Meat", "Seafood", "Cleaning Supplies", "Beauty"
         ]
@@ -106,10 +102,11 @@ struct CategorizedListView: View {
         return Set(predefinedCategories).union(otherCategories)
     }
     
-    private func categoryActionSheetButtons() -> [ActionSheet.Button] {
+    // Action Sheet Buttons for Category Selection
+    func categoryActionSheetButtons() -> [ActionSheet.Button] {
         var buttons: [ActionSheet.Button] = []
         
-        for category in categoriesList {
+        for category in categoriesList.sorted() {
             buttons.append(.default(Text(category)) {
                 reassignItem(to: category)
             })
@@ -119,7 +116,8 @@ struct CategorizedListView: View {
         return buttons
     }
     
-    private func reassignItem(to newCategory: String) {
+    // Reassign Item to New Category
+    func reassignItem(to newCategory: String) {
         guard let item = selectedItem else { return }
         
         // Remove from current category
@@ -133,4 +131,14 @@ struct CategorizedListView: View {
         // Add to new category
         categorizedItems[newCategory, default: []].append(item)
     }
+}
+
+#Preview {
+    CategorizedListView(shoppingItems: [
+        ShoppingItem(name: "Apples", quantity: 2),
+        ShoppingItem(name: "Milk", quantity: 1),
+        ShoppingItem(name: "Bread", quantity: 1),
+        ShoppingItem(name: "Chicken", quantity: 3),
+        ShoppingItem(name: "Shampoo", quantity: 1)
+    ], selectedStore: "Target")
 }

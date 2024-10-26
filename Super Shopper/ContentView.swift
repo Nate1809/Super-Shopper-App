@@ -1,25 +1,22 @@
-//
-//  ContentView.swift
-//  Super Shopper
-//
-//  Created by Nathan Guzman on 10/25/24.
-//
-
 // ContentView.swift
 
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject var shoppingList = ShoppingList()
+    @State private var shoppingItems: [ShoppingItem] = []
     @State private var selectedStore: String = "Target"
-    
+    @State private var newItemName: String = ""
+    @FocusState private var isItemNameFocused: Bool
+
     var body: some View {
         NavigationView {
-            VStack(alignment: .leading) {
+            VStack {
+                // Store Picker
                 Text("Select Your Store:")
                     .font(.headline)
+                    .padding(.top)
                     .padding(.bottom, 5)
-                
+
                 Picker("Store", selection: $selectedStore) {
                     Text("Target").tag("Target")
                     Text("Whole Foods").tag("Whole Foods")
@@ -27,59 +24,63 @@ struct ContentView: View {
                     Text("Other").tag("Other")
                 }
                 .pickerStyle(SegmentedPickerStyle())
+                .padding(.horizontal)
                 .padding(.bottom, 20)
-                
-                Text("Your Shopping List:")
-                    .font(.headline)
-                    .padding(.bottom, 5)
-                
+
+                // List of Shopping Items
                 List {
-                    ForEach(shoppingList.items) { item in
+                    ForEach(shoppingItems) { item in
                         ShoppingItemRow(item: item)
                     }
                     .onDelete(perform: deleteItems)
-                    
-                    Button(action: addItem) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.green)
-                            Text("Add Item")
+                }
+                .listStyle(PlainListStyle())
+
+                // Input Fields at the Bottom
+                VStack {
+                    Divider()
+                    HStack {
+                        TextField("Item Name", text: $newItemName)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .focused($isItemNameFocused)
+                            .onSubmit {
+                                addItem()
+                            }
+                        Button(action: {
+                            addItem()
+                        }) {
+                            Text("Add")
+                                .foregroundColor(.white)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 16)
+                                .background(Color.green)
+                                .cornerRadius(8)
                         }
                     }
+                    .padding()
                 }
-                
-                NavigationLink(destination: CategorizedListView(
-                    shoppingItems: shoppingList.items,
-                    selectedStore: selectedStore
-                )) {
-                    Text("Categorize Items")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(canProceed ? Color.blue : Color.gray)
-                        .cornerRadius(8)
-                }
-                .padding(.top)
-                .disabled(!canProceed)
-                
-                Spacer()
+                .background(Color(UIColor.systemBackground))
             }
-            .padding()
             .navigationTitle("Super Shopper")
+            .onAppear {
+                isItemNameFocused = true
+            }
+            .padding(.bottom, 8) // Add padding to prevent squishing
         }
     }
-    
-    private func addItem() {
-        let newItem = ShoppingItem(name: "", quantity: 1)
-        shoppingList.items.append(newItem)
+
+    func addItem() {
+        let trimmedName = newItemName.trimmingCharacters(in: .whitespaces)
+        guard !trimmedName.isEmpty else { return }
+
+        let newItem = ShoppingItem(name: trimmedName, quantity: 1)
+        shoppingItems.append(newItem)
+        newItemName = ""
+        isItemNameFocused = true
     }
-    
-    private func deleteItems(at offsets: IndexSet) {
-        shoppingList.items.remove(atOffsets: offsets)
-    }
-    
-    // Computed property to check if we can proceed
-    private var canProceed: Bool {
-        !shoppingList.items.isEmpty && shoppingList.items.allSatisfy { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }
+
+    func deleteItems(at offsets: IndexSet) {
+        shoppingItems.remove(atOffsets: offsets)
     }
 }
 

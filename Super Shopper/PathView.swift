@@ -1,11 +1,3 @@
-//
-//  PathView.swift
-//  Super Shopper
-//
-//  Created by Nathan Guzman on 10/25/24.
-//
-
-
 // PathView.swift
 
 import SwiftUI
@@ -30,17 +22,20 @@ struct PathView: View {
                         }
                     } else {
                         Text("No items for this section.")
+                            .foregroundColor(.secondary)
                     }
                 }
             }
         }
+        .listStyle(InsetGroupedListStyle())
         .navigationTitle("Optimal Path")
         .onAppear {
             calculatePath()
         }
     }
     
-    private func calculatePath() {
+    // Calculate Path Function
+    func calculatePath() {
         let storeSections = StoreLayout.layout(for: selectedStore)
         let neededCategories = Set(categorizedItems.keys)
         let neededSections = storeSections.filter { neededCategories.contains($0.category) }
@@ -53,4 +48,14 @@ struct PathView: View {
             }
         }
     }
+}
+
+#Preview {
+    PathView(categorizedItems: [
+        "Produce": [ShoppingItem(name: "Apples", quantity: 2)],
+        "Dairy": [ShoppingItem(name: "Milk", quantity: 1)],
+        "Bakery": [ShoppingItem(name: "Bread", quantity: 1)],
+        "Meat": [ShoppingItem(name: "Chicken", quantity: 3)],
+        "Beauty": [ShoppingItem(name: "Shampoo", quantity: 1)]
+    ], selectedStore: "Target")
 }
