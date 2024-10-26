@@ -12,9 +12,9 @@ class CategorizedListViewModel: ObservableObject {
     @Published var selectedItem: ShoppingItem? = nil
     @Published var categoriesList: [String] = []
     
-    // Optional: For confirmation alerts (if implementing)
-    @Published var showReassignConfirmation: Bool = false
-    @Published var categoryToReassign: String? = nil
+    // Removed properties related to confirmation alerts
+    // @Published var showReassignConfirmation: Bool = false
+    // @Published var categoryToReassign: String? = nil
     
     // MARK: - Initializer
     init(shoppingItems: [ShoppingItem], selectedStore: String) {
@@ -73,8 +73,7 @@ class CategorizedListViewModel: ObservableObject {
         // Use map to transform categoriesList into ActionSheet buttons
         let categoryButtons = categoriesList.map { category in
             ActionSheet.Button.default(Text(category)) { [weak self] in
-                self?.categoryToReassign = category
-                self?.showReassignConfirmation = true
+                self?.reassignItem(to: category)
             }
         }
         
@@ -82,15 +81,27 @@ class CategorizedListViewModel: ObservableObject {
         return categoryButtons + [.cancel()]
     }
     
-    /// Reassigns the selected item to a new category
+    /// Reassigns the selected item to a new category without confirmation
     func reassignItem(to newCategory: String) {
-        guard let item = selectedItem, let category = categoryToReassign else { return }
+        guard let item = selectedItem else { return }
+        
+        // Identify the current category of the item
+        var currentCategory: String? = nil
+        for (categoryName, items) in categorizedItems {
+            if items.contains(item) {
+                currentCategory = categoryName
+                break
+            }
+        }
         
         // Remove the item from its current category
-        for (categoryName, items) in categorizedItems {
-            if let index = items.firstIndex(of: item) {
-                categorizedItems[categoryName]?.remove(at: index)
-                break
+        if let category = currentCategory,
+           let index = categorizedItems[category]?.firstIndex(of: item) {
+            categorizedItems[category]?.remove(at: index)
+            
+            // If the category is now empty, remove it from the dictionary
+            if categorizedItems[category]?.isEmpty == true {
+                categorizedItems.removeValue(forKey: category)
             }
         }
         
@@ -99,12 +110,6 @@ class CategorizedListViewModel: ObservableObject {
         
         // Reset the reassignment properties
         selectedItem = nil
-        categoryToReassign = nil
         showCategoryPicker = false
-        showReassignConfirmation = false
     }
-    
-    // MARK: - Optional: Confirmation Alert Handling
-    // If you decide to implement confirmation alerts, you can handle them here.
-    // Example methods and properties are already included above.
 }

@@ -48,12 +48,15 @@ struct ContentView: View {
                         Button(action: {
                             addItem()
                         }) {
-                            Text("Add")
-                                .foregroundColor(.white)
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-                                .background(Color.green)
-                                .cornerRadius(8)
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text("Add")
+                            }
+                            .foregroundColor(.white)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(Color.green)
+                            .cornerRadius(8)
                         }
                         .disabled(newItemName.trimmingCharacters(in: .whitespaces).isEmpty) // Disable button if input is empty
                     }
@@ -68,8 +71,12 @@ struct ContentView: View {
                         shoppingItems: shoppingItems,
                         selectedStore: selectedStore
                     )) {
-                        Text("Next")
-                            .foregroundColor(.blue)
+                        HStack {
+                            Text("Next")
+                            Image(systemName: "arrow.right.circle.fill")
+                        }
+                        .foregroundColor(.blue)
+                        .font(.headline)
                     }
                 }
             }

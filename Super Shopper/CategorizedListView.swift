@@ -55,18 +55,6 @@ struct CategorizedListView: View {
                 buttons: viewModel.categoryActionSheetButtons()
             )
         }
-        // Optional: Handle Confirmation Alert
-        .alert(isPresented: $viewModel.showReassignConfirmation) {
-            Alert(
-                title: Text("Confirm Reassignment"),
-                message: Text("Move '\(viewModel.selectedItem?.name ?? "")' to '\(viewModel.categoryToReassign ?? "")'?"),
-                primaryButton: .default(Text("Yes"), action: {
-                    if let category = viewModel.categoryToReassign {
-                        viewModel.reassignItem(to: category)
-                    }
-                }),
-                secondaryButton: .cancel()
-            )
-        }
+        // Removed the alert modifier since confirmation is no longer needed
     }
 }
