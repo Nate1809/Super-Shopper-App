@@ -62,6 +62,17 @@ struct ContentView: View {
                 .background(Color(UIColor.systemBackground))
             }
             .navigationTitle("Super Shopper")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: CategorizedListView(
+                        shoppingItems: shoppingItems,
+                        selectedStore: selectedStore
+                    )) {
+                        Text("Next")
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
             .onAppear {
                 isItemNameFocused = true
             }

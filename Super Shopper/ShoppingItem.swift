@@ -12,6 +12,7 @@ class ShoppingItem: Identifiable, ObservableObject, Equatable {
         self.quantity = quantity
     }
 
+    // Implement the Equatable protocol
     static func == (lhs: ShoppingItem, rhs: ShoppingItem) -> Bool {
         return lhs.id == rhs.id
     }
