@@ -80,21 +80,38 @@ struct PathView: View {
                 }
             }
 
-            // Next Section Button at the Bottom
-            Button(action: {
-                withAnimation {
-                    viewModel.moveToNextSection()
+            // Previous and Next Section Buttons at the Bottom
+            HStack {
+                Button(action: {
+                    withAnimation {
+                        viewModel.moveToPreviousSection()
+                    }
+                }) {
+                    Text("Previous Section")
+                        .font(.headline)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(viewModel.currentSectionIndex > 0 ? Color.blue : Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                 }
-            }) {
-                Text("Next Section")
-                    .font(.headline)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                .disabled(viewModel.currentSectionIndex == 0)
+
+                Button(action: {
+                    withAnimation {
+                        viewModel.moveToNextSection()
+                    }
+                }) {
+                    Text("Next Section")
+                        .font(.headline)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(viewModel.currentSectionIndex < viewModel.sectionTitles.count - 1 ? Color.blue : Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .disabled(viewModel.currentSectionIndex >= viewModel.sectionTitles.count - 1)
             }
-            .disabled(viewModel.currentSectionIndex >= viewModel.sectionTitles.count - 1)
             .padding()
         }
         .navigationTitle("Optimal Path")

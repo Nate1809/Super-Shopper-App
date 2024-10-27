@@ -20,12 +20,25 @@ class PathViewModel: ObservableObject {
         sectionTitles[currentSectionIndex]
     }
 
+    var currentSectionItems: [ShoppingItem] {
+        categorizedItems[currentSectionTitle] ?? []
+    }
+
     func toggleItemGrabbed(_ item: ShoppingItem) {
         if grabbedItems.contains(item.id) {
             grabbedItems.remove(item.id)
         } else {
             grabbedItems.insert(item.id)
         }
+
+        // Auto-advance if all items in current section are grabbed
+        if allItemsInCurrentSectionGrabbed() {
+            moveToNextSection()
+        }
+    }
+
+    func allItemsInCurrentSectionGrabbed() -> Bool {
+        return currentSectionItems.allSatisfy { grabbedItems.contains($0.id) }
     }
 
     func moveToNextSection() {
