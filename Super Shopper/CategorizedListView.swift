@@ -10,14 +10,20 @@ struct CategorizedListView: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
+            // Instructional Text
+            Text("Tap on an item to change its category or adjust the quantity.")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .padding(.horizontal)
+                .padding(.top, 4)
+
             List {
                 ForEach(viewModel.categorizedItems.keys.sorted(), id: \.self) { category in
-                    // Only display categories that have items
                     if let items = viewModel.categorizedItems[category], !items.isEmpty {
                         Section(header: Text(category)) {
                             ForEach(items) { item in
-                                ShoppingItemRow(item: item, isNameEditable: false) // Disable name editing
+                                ShoppingItemRow(item: item, isNameEditable: false)
                                     .onTapGesture {
                                         viewModel.selectedItem = item
                                         viewModel.showCategoryPicker = true
@@ -65,12 +71,10 @@ struct CategorizedListView: View {
         }
     }
     
-    /// Computed property to determine the "Show Optimal Path" button label based on its state
     var showOptimalPathButtonLabel: String {
         viewModel.categorizedItems.values.flatMap { $0 }.isEmpty ? "No Items to Show Path" : "Show Optimal Path"
     }
     
-    /// Custom ButtonStyle for press animations
     struct PressableButtonStyle: ButtonStyle {
         func makeBody(configuration: Configuration) -> some View {
             configuration.label
