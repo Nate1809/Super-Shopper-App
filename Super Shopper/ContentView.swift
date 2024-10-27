@@ -1,6 +1,7 @@
 // ContentView.swift
 
 import SwiftUI
+import UIKit // Import UIKit for haptic feedback
 
 struct ContentView: View {
     @State private var shoppingItems: [ShoppingItem] = []
@@ -39,6 +40,7 @@ struct ContentView: View {
                 }
                 .disabled(shoppingItems.isEmpty) // Disable the button if the list is empty
                 .padding([.horizontal, .top])
+                .buttonStyle(PressableButtonStyle()) // Apply custom button style
                 
                 // Input Fields at the Bottom
                 VStack {
@@ -50,6 +52,7 @@ struct ContentView: View {
                             .submitLabel(.done) // Optional: Change the return key label
                         
                         Button(action: {
+                            triggerHaptic()
                             addItem()
                         }) {
                             HStack {
@@ -63,6 +66,7 @@ struct ContentView: View {
                             .cornerRadius(8)
                         }
                         .disabled(newItemName.trimmingCharacters(in: .whitespaces).isEmpty) // Disable button if input is empty
+                        .buttonStyle(PressableButtonStyle()) // Apply custom button style
                     }
                     .padding()
                 }
@@ -73,6 +77,7 @@ struct ContentView: View {
                 // Shopping Cart Button for Store Selection
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
+                        triggerHaptic()
                         showStoreSelection = true
                     }) {
                         Image(systemName: "cart.fill")
@@ -80,11 +85,13 @@ struct ContentView: View {
                             .foregroundColor(.blue)
                             .accessibilityLabel("Select Store")
                     }
+                    .buttonStyle(PressableButtonStyle()) // Apply custom button style
                 }
 
                 // "?" Button for Tutorial
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
+                        triggerHaptic()
                         showTutorial = true
                     }) {
                         Image(systemName: "questionmark.circle.fill")
@@ -92,6 +99,7 @@ struct ContentView: View {
                             .foregroundColor(.blue)
                             .accessibilityLabel("Show Tutorial")
                     }
+                    .buttonStyle(PressableButtonStyle()) // Apply custom button style
                 }
             }
             .onAppear {
@@ -128,6 +136,22 @@ struct ContentView: View {
     /// Deletes items from the shopping list
     func deleteItems(at offsets: IndexSet) {
         shoppingItems.remove(atOffsets: offsets)
+    }
+    
+    /// Triggers haptic feedback using UIImpactFeedbackGenerator
+    func triggerHaptic() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.prepare()
+        generator.impactOccurred()
+    }
+    
+    /// Custom ButtonStyle for press animations
+    struct PressableButtonStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+                .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
+        }
     }
 }
 
