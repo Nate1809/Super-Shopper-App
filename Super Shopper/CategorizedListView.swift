@@ -17,7 +17,11 @@ struct CategorizedListView: View {
                     if let items = viewModel.categorizedItems[category], !items.isEmpty {
                         Section(header: Text(category)) {
                             ForEach(items) { item in
-                                ShoppingItemRow(item: item)
+                                ShoppingItemRow(item: item, isNameEditable: false) // Disable name editing
+                                    .onTapGesture {
+                                        viewModel.selectedItem = item
+                                        viewModel.showCategoryPicker = true
+                                    }
                             }
                             .onDelete { indices in
                                 let itemsToDelete = indices.map { items[$0] }

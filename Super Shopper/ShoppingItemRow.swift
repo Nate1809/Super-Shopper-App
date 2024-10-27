@@ -4,16 +4,18 @@ import SwiftUI
 
 struct ShoppingItemRow: View {
     @ObservedObject var item: ShoppingItem
-    @FocusState private var isNameFocused: Bool
     @FocusState private var isQuantityFocused: Bool
+    var isNameEditable: Bool = true
 
     var body: some View {
         HStack {
-            TextField("Item Name", text: $item.name)
-                .focused($isNameFocused)
-                .onSubmit {
-                    validateItemName()
-                }
+            if isNameEditable {
+                TextField("Item Name", text: $item.name)
+                    .focused($isQuantityFocused)
+            } else {
+                Text(item.name) // Display as plain text if editing is disabled
+                    .font(.body)
+            }
             Spacer()
             TextField("Qty", value: $item.quantity, formatter: NumberFormatter.integer)
                 .keyboardType(.numberPad)
@@ -26,17 +28,9 @@ struct ShoppingItemRow: View {
         }
         .padding(.vertical, 4)
         .onAppear {
-            // Optionally, focus the name field when the item is empty
-            if item.name.isEmpty {
-                isNameFocused = true
+            if isNameEditable && item.name.isEmpty {
+                isQuantityFocused = true
             }
-        }
-    }
-
-    func validateItemName() {
-        item.name = item.name.trimmingCharacters(in: .whitespaces)
-        if item.name.isEmpty {
-            item.name = "Unnamed Item"
         }
     }
 
