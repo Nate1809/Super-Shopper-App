@@ -13,17 +13,20 @@ struct CategorizedListView: View {
         VStack {
             List {
                 ForEach(viewModel.categorizedItems.keys.sorted(), id: \.self) { category in
-                    Section(header: Text(category)) {
-                        ForEach(viewModel.categorizedItems[category]!) { item in
-                            HStack {
-                                Text(item.name)
-                                Spacer()
-                                Text("Qty: \(item.quantity)")
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                viewModel.selectedItem = item
-                                viewModel.showCategoryPicker = true
+                    // Only display categories that have items
+                    if let items = viewModel.categorizedItems[category], !items.isEmpty {
+                        Section(header: Text(category)) {
+                            ForEach(items) { item in
+                                HStack {
+                                    Text(item.name)
+                                    Spacer()
+                                    Text("Qty: \(item.quantity)")
+                                }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    viewModel.selectedItem = item
+                                    viewModel.showCategoryPicker = true
+                                }
                             }
                         }
                     }
@@ -38,9 +41,10 @@ struct CategorizedListView: View {
                 Text("Show Optimal Path")
                     .foregroundColor(.white)
                     .padding()
-                    .background(Color.green)
+                    .background(viewModel.categorizedItems.values.flatMap { $0 }.isEmpty ? Color.gray : Color.green)
                     .cornerRadius(8)
             }
+            .disabled(viewModel.categorizedItems.values.flatMap { $0 }.isEmpty) // Disable if no items
             .padding()
         }
         .navigationTitle("Categorized Items")
@@ -55,6 +59,9 @@ struct CategorizedListView: View {
                 buttons: viewModel.categoryActionSheetButtons()
             )
         }
-        // Removed the alert modifier since confirmation is no longer needed
     }
+}
+
+#Preview {
+    CategorizedListView(shoppingItems: [ShoppingItem(name: "Milk", quantity: 2)], selectedStore: "Target")
 }
