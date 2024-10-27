@@ -17,15 +17,12 @@ struct CategorizedListView: View {
                     if let items = viewModel.categorizedItems[category], !items.isEmpty {
                         Section(header: Text(category)) {
                             ForEach(items) { item in
-                                HStack {
-                                    Text(item.name)
-                                    Spacer()
-                                    Text("Qty: \(item.quantity)")
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.selectedItem = item
-                                    viewModel.showCategoryPicker = true
+                                ShoppingItemRow(item: item)
+                            }
+                            .onDelete { indices in
+                                let itemsToDelete = indices.map { items[$0] }
+                                for item in itemsToDelete {
+                                    viewModel.deleteItem(item)
                                 }
                             }
                         }
@@ -38,14 +35,17 @@ struct CategorizedListView: View {
                 categorizedItems: viewModel.categorizedItems,
                 selectedStore: viewModel.selectedStore
             )) {
-                Text("Show Optimal Path")
-                    .foregroundColor(.white)
+                Text(showOptimalPathButtonLabel)
+                    .font(.headline)
+                    .foregroundColor(viewModel.categorizedItems.values.flatMap { $0 }.isEmpty ? Color.white.opacity(0.6) : Color.white)
+                    .frame(maxWidth: .infinity)
                     .padding()
                     .background(viewModel.categorizedItems.values.flatMap { $0 }.isEmpty ? Color.gray : Color.green)
-                    .cornerRadius(8)
+                    .cornerRadius(10)
             }
             .disabled(viewModel.categorizedItems.values.flatMap { $0 }.isEmpty) // Disable if no items
-            .padding()
+            .padding([.horizontal, .bottom])
+            .buttonStyle(PressableButtonStyle()) // Apply custom button style
         }
         .navigationTitle("Categorized Items")
         .onAppear {
@@ -58,6 +58,20 @@ struct CategorizedListView: View {
                 message: Text("Assign a category to '\(viewModel.selectedItem?.name ?? "")'"),
                 buttons: viewModel.categoryActionSheetButtons()
             )
+        }
+    }
+    
+    /// Computed property to determine the "Show Optimal Path" button label based on its state
+    var showOptimalPathButtonLabel: String {
+        viewModel.categorizedItems.values.flatMap { $0 }.isEmpty ? "No Items to Show Path" : "Show Optimal Path"
+    }
+    
+    /// Custom ButtonStyle for press animations
+    struct PressableButtonStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+                .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
         }
     }
 }

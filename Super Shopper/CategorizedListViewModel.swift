@@ -112,4 +112,13 @@ class CategorizedListViewModel: ObservableObject {
         selectedItem = nil
         showCategoryPicker = false
     }
+    
+    // MARK: - Deletion Functionality
+    /// Deletes an item from the shopping list
+    func deleteItem(_ item: ShoppingItem) {
+        if let index = shoppingItems.firstIndex(of: item) {
+            shoppingItems.remove(at: index)
+            categorizeItems()
+        }
+    }
 }

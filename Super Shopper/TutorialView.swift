@@ -53,7 +53,7 @@ struct TutorialView: View {
                 }
                 .padding()
             }
-            .navigationTitle("How to Use")
+            .navigationBarTitle("Super Shopper Tutorial", displayMode: .inline) // Single Title
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
