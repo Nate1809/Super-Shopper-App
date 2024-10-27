@@ -7,7 +7,13 @@ struct PathView: View {
     @Namespace private var scrollNamespace // For smooth scrolling
 
     init(categorizedItems: [String: [ShoppingItem]], selectedStore: String) {
-        self.viewModel = PathViewModel(categorizedItems: categorizedItems)
+        let viewModel = PathViewModel(categorizedItems: categorizedItems)
+        self.viewModel = viewModel
+        self.viewModel.onAutoAdvance = { [weak viewModel] in
+            withAnimation {
+                viewModel?.moveToNextSection()
+            }
+        }
     }
 
     var body: some View {
@@ -71,7 +77,7 @@ struct PathView: View {
                         }
                     }
                     .onChange(of: viewModel.currentSectionIndex) { index in
-                        // Scroll to the new current section smoothly
+                        // Smooth scroll to the new current section
                         let sectionTitle = viewModel.sectionTitles[index]
                         withAnimation {
                             proxy.scrollTo(sectionTitle, anchor: .top)

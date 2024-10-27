@@ -8,6 +8,9 @@ class PathViewModel: ObservableObject {
     @Published var currentSectionIndex: Int = 0
     @Published var grabbedItems: Set<UUID> = []
 
+    // Closure to notify PathView for smooth scroll
+    var onAutoAdvance: (() -> Void)?
+
     init(categorizedItems: [String: [ShoppingItem]]) {
         self.categorizedItems = categorizedItems
     }
@@ -31,9 +34,9 @@ class PathViewModel: ObservableObject {
             grabbedItems.insert(item.id)
         }
 
-        // Auto-advance if all items in current section are grabbed
+        // Check if all items in the section are grabbed and trigger auto-advance
         if allItemsInCurrentSectionGrabbed() {
-            moveToNextSection()
+            onAutoAdvance?() // Trigger the smooth scroll via the closure
         }
     }
 
