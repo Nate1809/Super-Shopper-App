@@ -1,20 +1,29 @@
-// CategorizedListViewModel.swift
-
 import Foundation
 import SwiftUI
 
 class CategorizedListViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var shoppingItems: [ShoppingItem] = []
-    @Published var categorizedItems: [String: [ShoppingItem]] = [:]
+    @Published var categorizedItems: [MainCategory] = []
     @Published var selectedStore: String
     @Published var showCategoryPicker: Bool = false
     @Published var selectedItem: ShoppingItem? = nil
-    @Published var categoriesList: [String] = []
+    @Published var mainCategoriesList: [MainCategory] = []
     
-    // Removed properties related to confirmation alerts
-    // @Published var showReassignConfirmation: Bool = false
-    // @Published var categoryToReassign: String? = nil
+    // MARK: - Category Mappings
+    private let categoryMappings: [String: (main: String, sub: String)] = [
+        "flour": ("Groceries", "Flours"),
+        "milk": ("Groceries", "Dairy"),
+        "apple": ("Groceries", "Fruits"),
+        "bread": ("Groceries", "Bakery"),
+        "chicken": ("Groceries", "Meat"),
+        "salmon": ("Groceries", "Seafood"),
+        "detergent": ("Cleaning", "Detergents"),
+        "shampoo": ("Beauty", "Hair Care"),
+        "conditioner": ("Beauty", "Hair Care"),
+        "toothpaste": ("Beauty", "Personal Hygiene")
+        // Add more mappings as needed
+    ]
     
     // MARK: - Initializer
     init(shoppingItems: [ShoppingItem], selectedStore: String) {
@@ -24,34 +33,67 @@ class CategorizedListViewModel: ObservableObject {
     }
     
     // MARK: - Categorization Logic
-    /// Categorizes shopping items based on predefined keywords
     func categorizeItems() {
-        let categories = [
-            "Produce": ["apple", "banana", "carrot", "lettuce"],
-            "Dairy": ["milk", "cheese", "yogurt"],
-            "Bakery": ["bread", "bagel", "muffin"],
-            "Meat": ["chicken", "beef", "pork"],
-            "Seafood": ["salmon", "shrimp", "tuna"],
-            "Cleaning Supplies": ["detergent", "bleach", "soap"],
-            "Beauty": ["shampoo", "conditioner", "toothpaste"]
+        // Define main categories and their subcategories
+        var tempCategorizedItems: [MainCategory] = [
+            MainCategory(name: "Groceries", subcategories: [
+                SubCategory(name: "Flours"),
+                SubCategory(name: "Fruits"),
+                SubCategory(name: "Dairy"),
+                SubCategory(name: "Bakery"),
+                SubCategory(name: "Meat"),
+                SubCategory(name: "Seafood")
+            ]),
+            MainCategory(name: "Beauty", subcategories: [
+                SubCategory(name: "Hair Care"),
+                SubCategory(name: "Skincare"),
+                SubCategory(name: "Personal Hygiene")
+            ]),
+            MainCategory(name: "Cleaning", subcategories: [
+                SubCategory(name: "Detergents"),
+                SubCategory(name: "Cleaning Tools")
+            ]),
+            MainCategory(name: "Menswear", subcategories: [
+                SubCategory(name: "Shirts"),
+                SubCategory(name: "Pants"),
+                SubCategory(name: "Accessories")
+            ]),
+            MainCategory(name: "Other", subcategories: [
+                SubCategory(name: "Miscellaneous")
+            ])
         ]
         
-        var tempCategorizedItems: [String: [ShoppingItem]] = [:]
+        // Initialize items in subcategories
+        for i in 0..<tempCategorizedItems.count {
+            for j in 0..<tempCategorizedItems[i].subcategories.count {
+                tempCategorizedItems[i].subcategories[j].items = []
+            }
+        }
         
+        // Assign items to categories based on mapping
         for item in shoppingItems {
-            let lowercasedItemName = item.name.lowercased()
-            var foundCategory = false
+            let lowercasedName = item.name.lowercased()
+            var assigned = false
             
-            for (category, keywords) in categories {
-                if keywords.contains(where: { lowercasedItemName.contains($0) }) {
-                    tempCategorizedItems[category, default: []].append(item)
-                    foundCategory = true
-                    break
+            for (keyword, (main, sub)) in categoryMappings {
+                if lowercasedName.contains(keyword) {
+                    if let mainIndex = tempCategorizedItems.firstIndex(where: { $0.name == main }) {
+                        if let subIndex = tempCategorizedItems[mainIndex].subcategories.firstIndex(where: { $0.name == sub }) {
+                            tempCategorizedItems[mainIndex].subcategories[subIndex].items.append(item)
+                            assigned = true
+                            break
+                        }
+                    }
                 }
             }
             
-            if !foundCategory {
-                tempCategorizedItems["Other", default: []].append(item)
+            if !assigned {
+                // Assign to "Other > Miscellaneous"
+                if let otherMainIndex = tempCategorizedItems.firstIndex(where: { $0.name == "Other" }) {
+                    if let miscSubIndex = tempCategorizedItems[otherMainIndex].subcategories.firstIndex(where: { $0.name == "Miscellaneous" }) {
+                        tempCategorizedItems[otherMainIndex].subcategories[miscSubIndex].items.append(item)
+                    }
+                }
             }
         }
         
@@ -59,62 +101,46 @@ class CategorizedListViewModel: ObservableObject {
     }
     
     // MARK: - Category Management
-    /// Retrieves all categories, including predefined and custom ones
-    func getAllCategories() -> Set<String> {
-        let predefinedCategories = [
-            "Produce", "Dairy", "Bakery", "Meat", "Seafood", "Cleaning Supplies", "Beauty"
-        ]
-        let otherCategories = categorizedItems.keys
-        return Set(predefinedCategories).union(otherCategories)
-    }
-    
-    /// Generates action sheet buttons for category selection using map for cleaner code
     func categoryActionSheetButtons() -> [ActionSheet.Button] {
-        // Use map to transform categoriesList into ActionSheet buttons
-        let categoryButtons = categoriesList.map { category in
-            ActionSheet.Button.default(Text(category)) { [weak self] in
-                self?.reassignItem(to: category)
+        // Flatten all subcategories with their main category names
+        let buttons: [ActionSheet.Button] = categorizedItems.flatMap { mainCategory in
+            mainCategory.subcategories.map { subCategory in
+                ActionSheet.Button.default(Text("\(mainCategory.name) / \(subCategory.name)")) { [weak self] in
+                    self?.reassignItem(toMain: mainCategory.name, toSub: subCategory.name)
+                }
             }
-        }
+        } + [.cancel()]
         
-        // Append the cancel button
-        return categoryButtons + [.cancel()]
+        return buttons
     }
+
     
-    /// Reassigns the selected item to a new category without confirmation
-    func reassignItem(to newCategory: String) {
+    func reassignItem(toMain main: String, toSub sub: String) {
         guard let item = selectedItem else { return }
         
-        // Identify the current category of the item
-        var currentCategory: String? = nil
-        for (categoryName, items) in categorizedItems {
-            if items.contains(item) {
-                currentCategory = categoryName
-                break
-            }
-        }
-        
-        // Remove the item from its current category
-        if let category = currentCategory,
-           let index = categorizedItems[category]?.firstIndex(of: item) {
-            categorizedItems[category]?.remove(at: index)
-            
-            // If the category is now empty, remove it from the dictionary
-            if categorizedItems[category]?.isEmpty == true {
-                categorizedItems.removeValue(forKey: category)
+        // Remove item from its current category
+        for mainIndex in categorizedItems.indices {
+            for subIndex in categorizedItems[mainIndex].subcategories.indices {
+                if let itemIndex = categorizedItems[mainIndex].subcategories[subIndex].items.firstIndex(of: item) {
+                    categorizedItems[mainIndex].subcategories[subIndex].items.remove(at: itemIndex)
+                    break
+                }
             }
         }
         
         // Add the item to the new category
-        categorizedItems[newCategory, default: []].append(item)
+        if let mainIndex = categorizedItems.firstIndex(where: { $0.name == main }) {
+            if let subIndex = categorizedItems[mainIndex].subcategories.firstIndex(where: { $0.name == sub }) {
+                categorizedItems[mainIndex].subcategories[subIndex].items.append(item)
+            }
+        }
         
-        // Reset the reassignment properties
+        // Reset selection
         selectedItem = nil
         showCategoryPicker = false
     }
     
     // MARK: - Deletion Functionality
-    /// Deletes an item from the shopping list
     func deleteItem(_ item: ShoppingItem) {
         if let index = shoppingItems.firstIndex(of: item) {
             shoppingItems.remove(at: index)

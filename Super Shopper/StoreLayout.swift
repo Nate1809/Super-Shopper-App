@@ -1,5 +1,3 @@
-// StoreLayout.swift
-
 import Foundation
 
 struct StoreLayout {
@@ -18,49 +16,57 @@ struct StoreLayout {
 
     static func targetLayout() -> [StoreSection] {
         return [
-            StoreSection(name: "Produce", position: StoreSection.Position(x: 1, y: 1), category: "Produce"),
-            StoreSection(name: "Dairy", position: StoreSection.Position(x: 2, y: 1), category: "Dairy"),
-            StoreSection(name: "Bakery", position: StoreSection.Position(x: 3, y: 1), category: "Bakery"),
-            StoreSection(name: "Meat", position: StoreSection.Position(x: 4, y: 1), category: "Meat"),
-            StoreSection(name: "Seafood", position: StoreSection.Position(x: 5, y: 1), category: "Seafood"),
-            StoreSection(name: "Cleaning Supplies", position: StoreSection.Position(x: 6, y: 1), category: "Cleaning Supplies"),
-            StoreSection(name: "Beauty", position: StoreSection.Position(x: 7, y: 1), category: "Beauty")
+            StoreSection(name: "Entrance", position: StoreSection.Position(x: 0, y: 0), category: "Entrance"),
+            StoreSection(name: "Produce", position: StoreSection.Position(x: 1, y: 1), category: "Groceries"),
+            StoreSection(name: "Dairy", position: StoreSection.Position(x: 2, y: 1), category: "Groceries"),
+            StoreSection(name: "Bakery", position: StoreSection.Position(x: 3, y: 1), category: "Groceries"),
+            StoreSection(name: "Meat", position: StoreSection.Position(x: 4, y: 1), category: "Groceries"),
+            StoreSection(name: "Seafood", position: StoreSection.Position(x: 5, y: 1), category: "Groceries"),
+            StoreSection(name: "Detergents", position: StoreSection.Position(x: 6, y: 1), category: "Cleaning"),
+            StoreSection(name: "Hair Care", position: StoreSection.Position(x: 7, y: 1), category: "Beauty")
+            // Add more sections as needed
         ]
     }
 
     static func wholeFoodsLayout() -> [StoreSection] {
         return [
-            StoreSection(name: "Produce", position: StoreSection.Position(x: 1, y: 1), category: "Produce"),
-            StoreSection(name: "Dairy", position: StoreSection.Position(x: 2, y: 1), category: "Dairy"),
-            StoreSection(name: "Bakery", position: StoreSection.Position(x: 3, y: 1), category: "Bakery"),
-            StoreSection(name: "Meat", position: StoreSection.Position(x: 4, y: 1), category: "Meat"),
-            StoreSection(name: "Seafood", position: StoreSection.Position(x: 5, y: 1), category: "Seafood"),
-            StoreSection(name: "Health & Beauty", position: StoreSection.Position(x: 6, y: 1), category: "Beauty"),
-            StoreSection(name: "Household", position: StoreSection.Position(x: 7, y: 1), category: "Cleaning Supplies")
+            StoreSection(name: "Entrance", position: StoreSection.Position(x: 0, y: 0), category: "Entrance"),
+            StoreSection(name: "Produce", position: StoreSection.Position(x: 1, y: 1), category: "Groceries"),
+            StoreSection(name: "Dairy", position: StoreSection.Position(x: 2, y: 1), category: "Groceries"),
+            StoreSection(name: "Bakery", position: StoreSection.Position(x: 3, y: 1), category: "Groceries"),
+            StoreSection(name: "Meat", position: StoreSection.Position(x: 4, y: 1), category: "Groceries"),
+            StoreSection(name: "Seafood", position: StoreSection.Position(x: 5, y: 1), category: "Groceries"),
+            StoreSection(name: "Detergents", position: StoreSection.Position(x: 6, y: 1), category: "Cleaning"),
+            StoreSection(name: "Hair Care", position: StoreSection.Position(x: 7, y: 1), category: "Beauty")
+            // Add more sections as needed
         ]
     }
 
     static func hebLayout() -> [StoreSection] {
         return [
-            StoreSection(name: "Produce", position: StoreSection.Position(x: 1, y: 1), category: "Produce"),
-            StoreSection(name: "Dairy", position: StoreSection.Position(x: 2, y: 1), category: "Dairy"),
-            StoreSection(name: "Bakery", position: StoreSection.Position(x: 3, y: 1), category: "Bakery"),
-            StoreSection(name: "Meat", position: StoreSection.Position(x: 4, y: 1), category: "Meat"),
-            StoreSection(name: "Seafood", position: StoreSection.Position(x: 5, y: 1), category: "Seafood"),
-            StoreSection(name: "Cleaning Supplies", position: StoreSection.Position(x: 6, y: 1), category: "Cleaning Supplies"),
-            StoreSection(name: "Beauty", position: StoreSection.Position(x: 7, y: 1), category: "Beauty")
+            StoreSection(name: "Entrance", position: StoreSection.Position(x: 0, y: 0), category: "Entrance"),
+            StoreSection(name: "Produce", position: StoreSection.Position(x: 1, y: 1), category: "Groceries"),
+            StoreSection(name: "Dairy", position: StoreSection.Position(x: 2, y: 1), category: "Groceries"),
+            StoreSection(name: "Bakery", position: StoreSection.Position(x: 3, y: 1), category: "Groceries"),
+            StoreSection(name: "Meat", position: StoreSection.Position(x: 4, y: 1), category: "Groceries"),
+            StoreSection(name: "Seafood", position: StoreSection.Position(x: 5, y: 1), category: "Groceries"),
+            StoreSection(name: "Detergents", position: StoreSection.Position(x: 6, y: 1), category: "Cleaning"),
+            StoreSection(name: "Hair Care", position: StoreSection.Position(x: 7, y: 1), category: "Beauty")
+            // Add more sections as needed
         ]
     }
 
     static func defaultLayout() -> [StoreSection] {
         return [
-            StoreSection(name: "Produce", position: StoreSection.Position(x: 1, y: 1), category: "Produce"),
-            StoreSection(name: "Dairy", position: StoreSection.Position(x: 2, y: 1), category: "Dairy"),
-            StoreSection(name: "Bakery", position: StoreSection.Position(x: 3, y: 1), category: "Bakery"),
-            StoreSection(name: "Meat", position: StoreSection.Position(x: 4, y: 1), category: "Meat"),
-            StoreSection(name: "Seafood", position: StoreSection.Position(x: 5, y: 1), category: "Seafood"),
-            StoreSection(name: "Cleaning Supplies", position: StoreSection.Position(x: 6, y: 1), category: "Cleaning Supplies"),
-            StoreSection(name: "Beauty", position: StoreSection.Position(x: 7, y: 1), category: "Beauty")
+            StoreSection(name: "Entrance", position: StoreSection.Position(x: 0, y: 0), category: "Entrance"),
+            StoreSection(name: "Produce", position: StoreSection.Position(x: 1, y: 1), category: "Groceries"),
+            StoreSection(name: "Dairy", position: StoreSection.Position(x: 2, y: 1), category: "Groceries"),
+            StoreSection(name: "Bakery", position: StoreSection.Position(x: 3, y: 1), category: "Groceries"),
+            StoreSection(name: "Meat", position: StoreSection.Position(x: 4, y: 1), category: "Groceries"),
+            StoreSection(name: "Seafood", position: StoreSection.Position(x: 5, y: 1), category: "Groceries"),
+            StoreSection(name: "Detergents", position: StoreSection.Position(x: 6, y: 1), category: "Cleaning"),
+            StoreSection(name: "Hair Care", position: StoreSection.Position(x: 7, y: 1), category: "Beauty")
+            // Add more sections as needed
         ]
     }
 }

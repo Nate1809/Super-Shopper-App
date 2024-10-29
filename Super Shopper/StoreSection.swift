@@ -1,5 +1,3 @@
-// StoreSection.swift
-
 import Foundation
 
 struct StoreSection: Identifiable, Hashable, Equatable {
@@ -15,7 +13,7 @@ struct StoreSection: Identifiable, Hashable, Equatable {
         self.category = category
     }
     
-    // Define the Position struct to conform to Equatable
+    // Define the Position struct to conform to Equatable and Hashable
     struct Position: Equatable, Hashable {
         let x: Int
         let y: Int

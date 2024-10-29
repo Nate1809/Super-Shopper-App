@@ -1,5 +1,3 @@
-// CategorizedListView.swift
-
 import SwiftUI
 
 struct CategorizedListView: View {
@@ -19,22 +17,33 @@ struct CategorizedListView: View {
                 .padding(.top, 4)
 
             List {
-                ForEach(viewModel.categorizedItems.keys.sorted(), id: \.self) { category in
-                    if let items = viewModel.categorizedItems[category], !items.isEmpty {
-                        Section(header: Text(category)) {
-                            ForEach(items) { item in
-                                ShoppingItemRow(item: item, isNameEditable: false)
-                                    .onTapGesture {
-                                        viewModel.selectedItem = item
-                                        viewModel.showCategoryPicker = true
+                ForEach(viewModel.categorizedItems) { mainCategory in
+                    DisclosureGroup(mainCategory.name) {
+                        ForEach(mainCategory.subcategories) { subCategory in
+                            if !subCategory.items.isEmpty {
+                                VStack(alignment: .leading) {
+                                    Text(subCategory.name)
+                                        .font(.headline)
+                                        .padding(.vertical, 2)
+                                    ForEach(subCategory.items) { item in
+                                        ShoppingItemRow(item: item, isNameEditable: false)
+                                            .onTapGesture {
+                                                viewModel.selectedItem = item
+                                                viewModel.showCategoryPicker = true
+                                            }
+                                            .padding(.leading, 16)
                                     }
-                            }
-                            .onDelete { indices in
-                                let itemsToDelete = indices.map { items[$0] }
-                                for item in itemsToDelete {
-                                    viewModel.deleteItem(item)
+                                    .onDelete { indices in
+                                        let itemsToDelete = indices.map { subCategory.items[$0] }
+                                        for item in itemsToDelete {
+                                            viewModel.deleteItem(item)
+                                        }
+                                    }
                                 }
                             }
+                        }
+                        .onDelete { indices in
+                            // Handle deletion if needed for subcategories
                         }
                     }
                 }
@@ -47,20 +56,20 @@ struct CategorizedListView: View {
             )) {
                 Text(showOptimalPathButtonLabel)
                     .font(.headline)
-                    .foregroundColor(viewModel.categorizedItems.values.flatMap { $0 }.isEmpty ? Color.white.opacity(0.6) : Color.white)
+                    .foregroundColor(viewModel.shoppingItems.isEmpty ? Color.white.opacity(0.6) : Color.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(viewModel.categorizedItems.values.flatMap { $0 }.isEmpty ? Color.gray : Color.green)
+                    .background(viewModel.shoppingItems.isEmpty ? Color.gray : Color.green)
                     .cornerRadius(10)
             }
-            .disabled(viewModel.categorizedItems.values.flatMap { $0 }.isEmpty) // Disable if no items
+            .disabled(viewModel.shoppingItems.isEmpty)
             .padding([.horizontal, .bottom])
-            .buttonStyle(PressableButtonStyle()) // Apply custom button style
+            .buttonStyle(PressableButtonStyle())
         }
         .navigationTitle("Categorized Items")
         .onAppear {
             viewModel.categorizeItems()
-            viewModel.categoriesList = Array(viewModel.getAllCategories())
+            viewModel.mainCategoriesList = viewModel.categorizedItems
         }
         .actionSheet(isPresented: $viewModel.showCategoryPicker) {
             ActionSheet(
@@ -70,11 +79,11 @@ struct CategorizedListView: View {
             )
         }
     }
-    
+
     var showOptimalPathButtonLabel: String {
-        viewModel.categorizedItems.values.flatMap { $0 }.isEmpty ? "No Items to Show Path" : "Show Optimal Path"
+        viewModel.shoppingItems.isEmpty ? "No Items to Show Path" : "Show Optimal Path"
     }
-    
+
     struct PressableButtonStyle: ButtonStyle {
         func makeBody(configuration: Configuration) -> some View {
             configuration.label
@@ -85,5 +94,10 @@ struct CategorizedListView: View {
 }
 
 #Preview {
-    CategorizedListView(shoppingItems: [ShoppingItem(name: "Milk", quantity: 2)], selectedStore: "Target")
+    let sampleItems = [
+        ShoppingItem(name: "Milk", quantity: 2),
+        ShoppingItem(name: "Flour", quantity: 1),
+        ShoppingItem(name: "Shampoo", quantity: 1)
+    ]
+    CategorizedListView(shoppingItems: sampleItems, selectedStore: "Target")
 }
