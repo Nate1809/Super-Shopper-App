@@ -47,10 +47,13 @@ class PathViewModel: ObservableObject {
         let allItemsGrabbed = currentMainSection.subcategories.flatMap { $0.items }.allSatisfy { grabbedItems.contains($0.id) }
         
         if allItemsGrabbed, currentMainSectionIndex < path.count - 1 {
-            currentMainSectionIndex += 1
-            print("Automatically moved to next section: \(path[currentMainSectionIndex].name)")
+            withAnimation {
+                currentMainSectionIndex += 1
+                print("Automatically moved to next section with animation: \(path[currentMainSectionIndex].name)")
+            }
         }
     }
+
     
     // MARK: - Navigation Methods
     func moveToNextMainSection() {
