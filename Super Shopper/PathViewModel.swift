@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Combine
 
 class PathViewModel: ObservableObject {
     // MARK: - Published Properties
@@ -14,17 +15,21 @@ class PathViewModel: ObservableObject {
     init(categorizedItems: [MainCategory], selectedStore: String) {
         self.storeLayout = StoreLayout.layout(for: selectedStore)
         self.path = PathViewModel.computeOptimalPath(from: categorizedItems, with: storeLayout)
+        
+        // Observe changes to grabbedItems to automatically navigate
+        observeGrabbedItems()
     }
     
     // MARK: - Path Computation
     static func computeOptimalPath(from categorizedItems: [MainCategory], with storeLayout: [StoreSection]) -> [MainCategory] {
-        // Implement your A* or any pathfinding algorithm here.
-        // For simplicity, we'll assume the path is predefined or computed elsewhere.
-        // This function should return an ordered list of MainCategory with ordered SubCategories.
+        // Filter out empty subcategories
+        let filteredMainCategories = categorizedItems.map { mainCategory -> MainCategory in
+            let nonEmptySubcategories = mainCategory.subcategories.filter { !$0.items.isEmpty }
+            return MainCategory(name: mainCategory.name, subcategories: nonEmptySubcategories)
+        }.filter { !$0.subcategories.isEmpty }
         
-        // Placeholder implementation:
         // Sort main categories based on store layout positions
-        return categorizedItems.sorted { main1, main2 in
+        return filteredMainCategories.sorted { main1, main2 in
             guard let pos1 = storeLayout.first(where: { $0.category == main1.name })?.position,
                   let pos2 = storeLayout.first(where: { $0.category == main2.name })?.position else {
                 return main1.name < main2.name
@@ -33,7 +38,29 @@ class PathViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Navigation
+    // MARK: - Observation for Automatic Navigation
+    private func observeGrabbedItems() {
+        // Combine all items in the current main section
+        $grabbedItems
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.checkAndNavigate()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private var cancellables = Set<AnyCancellable>()
+    
+    private func checkAndNavigate() {
+        let currentMainSection = path[currentMainSectionIndex]
+        let allItemsGrabbed = currentMainSection.subcategories.flatMap { $0.items }.allSatisfy { grabbedItems.contains($0.id) }
+        
+        if allItemsGrabbed {
+            moveToNextMainSection()
+        }
+    }
+    
+    // MARK: - Navigation Methods
     func moveToNextMainSection() {
         if currentMainSectionIndex < path.count - 1 {
             currentMainSectionIndex += 1
@@ -46,7 +73,7 @@ class PathViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Item Grabbing
+    // MARK: - Item Grabbing Methods
     func toggleItemGrabbed(_ item: ShoppingItem) {
         if grabbedItems.contains(item.id) {
             grabbedItems.remove(item.id)
