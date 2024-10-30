@@ -2,160 +2,73 @@ import Foundation
 import SwiftUI
 
 class PathViewModel: ObservableObject {
-    @Published var path: [StoreSection] = []
+    // MARK: - Published Properties
+    @Published var path: [MainCategory] = []
+    @Published var currentMainSectionIndex: Int = 0
+    @Published var grabbedItems: Set<UUID> = []
     
+    // MARK: - Store Layout
     let storeLayout: [StoreSection]
-    let requiredSections: [StoreSection]
     
-    // MARK: - Initializer
+    // MARK: - Initialization
     init(categorizedItems: [MainCategory], selectedStore: String) {
-        // Initialize storeLayout first
         self.storeLayout = StoreLayout.layout(for: selectedStore)
-        
-        // Initialize requiredSections using a static method to avoid using 'self'
-        self.requiredSections = PathViewModel.extractSections(from: categorizedItems, with: storeLayout)
-        
-        // Now that all stored properties are initialized, you can safely call instance methods
-        computeOptimalPath()
+        self.path = PathViewModel.computeOptimalPath(from: categorizedItems, with: storeLayout)
     }
     
-    // MARK: - Extract Sections (Static Method)
-    /// Extracts unique store sections that contain items
-    /// - Parameters:
-    ///   - categorizedItems: The main categories with their subcategories and items
-    ///   - storeLayout: The layout of the store
-    /// - Returns: An array of unique StoreSection objects that have items
-    private static func extractSections(from categorizedItems: [MainCategory], with storeLayout: [StoreSection]) -> [StoreSection] {
-        var sectionsSet = Set<StoreSection>()
+    // MARK: - Path Computation
+    static func computeOptimalPath(from categorizedItems: [MainCategory], with storeLayout: [StoreSection]) -> [MainCategory] {
+        // Implement your A* or any pathfinding algorithm here.
+        // For simplicity, we'll assume the path is predefined or computed elsewhere.
+        // This function should return an ordered list of MainCategory with ordered SubCategories.
         
-        for mainCategory in categorizedItems {
-            for subCategory in mainCategory.subcategories {
-                if !subCategory.items.isEmpty {
-                    // Find the corresponding StoreSection based on the main category name
-                    if let section = storeLayout.first(where: { $0.category == mainCategory.name }) {
-                        sectionsSet.insert(section)
-                    }
-                }
+        // Placeholder implementation:
+        // Sort main categories based on store layout positions
+        return categorizedItems.sorted { main1, main2 in
+            guard let pos1 = storeLayout.first(where: { $0.category == main1.name })?.position,
+                  let pos2 = storeLayout.first(where: { $0.category == main2.name })?.position else {
+                return main1.name < main2.name
             }
+            return (pos1.x + pos1.y) < (pos2.x + pos2.y)
         }
-        
-        // Convert the set to an array and sort it (optional)
-        return Array(sectionsSet).sorted { $0.name < $1.name }
     }
     
-    // MARK: - Compute Optimal Path
-    /// Computes the optimal path using the A* algorithm
-    private func computeOptimalPath() {
-        // Starting point: Entrance
-        guard let entrance = storeLayout.first(where: { $0.name.lowercased() == "entrance" }) else { return }
-        
-        var path: [StoreSection] = [entrance]
-        var remainingSections = requiredSections.filter { $0.name.lowercased() != "entrance" }
-        
-        var current = entrance
-        
-        while !remainingSections.isEmpty {
-            // Find the closest section to current
-            if let closest = remainingSections.min(by: { manhattanDistance(from: current, to: $0) < manhattanDistance(from: current, to: $1) }) {
-                // Find path from current to closest using A*
-                if let subPath = aStar(from: current, to: closest) {
-                    // Append to path, excluding current as it's already included
-                    path += subPath.dropFirst()
-                }
-                // Update current
-                current = closest
-                // Remove from remaining
-                if let index = remainingSections.firstIndex(of: closest) {
-                    remainingSections.remove(at: index)
-                }
-            }
+    // MARK: - Navigation
+    func moveToNextMainSection() {
+        if currentMainSectionIndex < path.count - 1 {
+            currentMainSectionIndex += 1
         }
-        
-        self.path = path
     }
     
-    // MARK: - Manhattan Distance
-    /// Calculates Manhattan distance between two sections
-    private func manhattanDistance(from: StoreSection, to: StoreSection) -> Int {
-        return abs(from.position.x - to.position.x) + abs(from.position.y - to.position.y)
+    func moveToPreviousMainSection() {
+        if currentMainSectionIndex > 0 {
+            currentMainSectionIndex -= 1
+        }
     }
     
-    // MARK: - A* Pathfinding Algorithm
-    /// Implements the A* algorithm to find the shortest path between two sections
-    /// - Parameters:
-    ///   - start: Starting StoreSection
-    ///   - goal: Goal StoreSection
-    /// - Returns: An array of StoreSection objects representing the path, or nil if no path is found
-    private func aStar(from start: StoreSection, to goal: StoreSection) -> [StoreSection]? {
-        var openSet: Set<StoreSection> = [start]
-        var cameFrom: [StoreSection: StoreSection] = [:]
-        
-        var gScore: [StoreSection: Int] = [:]
-        gScore[start] = 0
-        
-        var fScore: [StoreSection: Int] = [:]
-        fScore[start] = manhattanDistance(from: start, to: goal)
-        
-        while !openSet.isEmpty {
-            // Get the section in openSet with the lowest fScore
-            guard let current = openSet.min(by: { (a, b) -> Bool in
-                (fScore[a] ?? Int.max) < (fScore[b] ?? Int.max)
-            }) else { break }
-            
-            if current == goal {
-                // Reconstruct and return the path
-                return reconstructPath(cameFrom: cameFrom, current: current)
-            }
-            
-            openSet.remove(current)
-            
-            // Get neighbors of the current section
-            let neighbors = getNeighbors(of: current)
-            
-            for neighbor in neighbors {
-                let tentativeGScore = (gScore[current] ?? Int.max) + 1 // Assuming uniform cost
-                
-                if tentativeGScore < (gScore[neighbor] ?? Int.max) {
-                    cameFrom[neighbor] = current
-                    gScore[neighbor] = tentativeGScore
-                    fScore[neighbor] = tentativeGScore + manhattanDistance(from: neighbor, to: goal)
-                    
-                    if !openSet.contains(neighbor) {
-                        openSet.insert(neighbor)
-                    }
-                }
-            }
+    // MARK: - Item Grabbing
+    func toggleItemGrabbed(_ item: ShoppingItem) {
+        if grabbedItems.contains(item.id) {
+            grabbedItems.remove(item.id)
+        } else {
+            grabbedItems.insert(item.id)
         }
-        
-        return nil // No path found
     }
     
-    // MARK: - Reconstruct Path
-    /// Reconstructs the path from the cameFrom map
-    /// - Parameters:
-    ///   - cameFrom: Dictionary mapping each section to its predecessor
-    ///   - current: The current section (goal)
-    /// - Returns: An array of StoreSection objects representing the path
-    private func reconstructPath(cameFrom: [StoreSection: StoreSection], current: StoreSection) -> [StoreSection] {
-        var totalPath = [current]
-        var currentNode = current
-        
-        while let previous = cameFrom[currentNode] {
-            totalPath.insert(previous, at: 0)
-            currentNode = previous
-        }
-        
-        return totalPath
+    func isItemGrabbed(_ item: ShoppingItem) -> Bool {
+        grabbedItems.contains(item.id)
     }
     
-    // MARK: - Get Neighbors
-    /// Retrieves adjacent sections in the store layout
-    /// - Parameter section: The current StoreSection
-    /// - Returns: An array of neighboring StoreSection objects
-    private func getNeighbors(of section: StoreSection) -> [StoreSection] {
-        return storeLayout.filter { neighbor in
-            (abs(neighbor.position.x - section.position.x) == 1 && neighbor.position.y == section.position.y) ||
-            (abs(neighbor.position.y - section.position.y) == 1 && neighbor.position.x == section.position.x)
-        }
+    // MARK: - Current Main Section
+    var currentMainSection: MainCategory {
+        path[currentMainSectionIndex]
+    }
+    
+    var isFirstMainSection: Bool {
+        currentMainSectionIndex == 0
+    }
+    
+    var isLastMainSection: Bool {
+        currentMainSectionIndex >= path.count - 1
     }
 }

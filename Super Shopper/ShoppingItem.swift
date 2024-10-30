@@ -10,12 +10,12 @@ class ShoppingItem: Identifiable, ObservableObject, Equatable, Hashable {
         self.quantity = quantity
     }
 
-    // Implement the Equatable protocol
+    // Equatable Protocol
     static func == (lhs: ShoppingItem, rhs: ShoppingItem) -> Bool {
         return lhs.id == rhs.id
     }
     
-    // Implement the Hashable protocol
+    // Hashable Protocol
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

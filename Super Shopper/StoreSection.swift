@@ -13,13 +13,11 @@ struct StoreSection: Identifiable, Hashable, Equatable {
         self.category = category
     }
     
-    // Define the Position struct to conform to Equatable and Hashable
     struct Position: Equatable, Hashable {
         let x: Int
         let y: Int
     }
     
-    // Explicitly implement the Equatable protocol
     static func == (lhs: StoreSection, rhs: StoreSection) -> Bool {
         return lhs.id == rhs.id &&
                lhs.name == rhs.name &&
