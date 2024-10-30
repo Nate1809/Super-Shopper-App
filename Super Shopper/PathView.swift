@@ -44,7 +44,7 @@ struct PathView: View {
                                         Text(subCategory.name)
                                             .font(.headline)
                                             .foregroundColor(.secondary)
-                    
+                
                                         // Items List
                                         VStack(alignment: .leading, spacing: 5) {
                                             ForEach(subCategory.items) { item in

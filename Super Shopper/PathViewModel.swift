@@ -6,7 +6,11 @@ class PathViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var path: [MainCategory] = []
     @Published var currentMainSectionIndex: Int = 0
-    @Published var grabbedItems: Set<UUID> = []
+    @Published var grabbedItems: Set<UUID> = [] {
+        didSet {
+            checkAndNavigate()
+        }
+    }
     
     // MARK: - Store Layout
     let storeLayout: [StoreSection]
@@ -15,9 +19,6 @@ class PathViewModel: ObservableObject {
     init(categorizedItems: [MainCategory], selectedStore: String) {
         self.storeLayout = StoreLayout.layout(for: selectedStore)
         self.path = PathViewModel.computeOptimalPath(from: categorizedItems, with: storeLayout)
-        
-        // Observe changes to grabbedItems to automatically navigate
-        observeGrabbedItems()
     }
     
     // MARK: - Path Computation
@@ -38,25 +39,16 @@ class PathViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Observation for Automatic Navigation
-    private func observeGrabbedItems() {
-        // Combine all items in the current main section
-        $grabbedItems
-            .sink { [weak self] _ in
-                guard let self = self else { return }
-                self.checkAndNavigate()
-            }
-            .store(in: &cancellables)
-    }
-    
-    private var cancellables = Set<AnyCancellable>()
-    
+    // MARK: - Check and Navigate Automatically
     private func checkAndNavigate() {
+        guard currentMainSectionIndex < path.count else { return }
+        
         let currentMainSection = path[currentMainSectionIndex]
         let allItemsGrabbed = currentMainSection.subcategories.flatMap { $0.items }.allSatisfy { grabbedItems.contains($0.id) }
         
-        if allItemsGrabbed {
-            moveToNextMainSection()
+        if allItemsGrabbed, currentMainSectionIndex < path.count - 1 {
+            currentMainSectionIndex += 1
+            print("Automatically moved to next section: \(path[currentMainSectionIndex].name)")
         }
     }
     
@@ -64,12 +56,14 @@ class PathViewModel: ObservableObject {
     func moveToNextMainSection() {
         if currentMainSectionIndex < path.count - 1 {
             currentMainSectionIndex += 1
+            print("Moved to next section: \(path[currentMainSectionIndex].name)")
         }
     }
     
     func moveToPreviousMainSection() {
         if currentMainSectionIndex > 0 {
             currentMainSectionIndex -= 1
+            print("Moved to previous section: \(path[currentMainSectionIndex].name)")
         }
     }
     
