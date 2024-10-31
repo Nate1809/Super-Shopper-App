@@ -24,14 +24,12 @@ struct PathView: View {
                     LazyVStack(alignment: .leading, spacing: 20) {
                         ForEach(Array(viewModel.path.enumerated()), id: \.element.id) { index, mainCategory in
                             VStack(alignment: .leading, spacing: 10) {
-                                // Main Section Header with Simulated Bolding
+                                // Main Section Header without scaling and shadow
                                 HStack {
                                     Text(mainCategory.name)
                                         .font(.title2)
                                         .fontWeight(.regular)
                                         .foregroundColor(viewModel.currentMainSectionIndex == index ? .blue : .primary)
-                                        .scaleEffect(viewModel.currentMainSectionIndex == index ? 1.05 : 1.0)
-                                        .shadow(color: viewModel.currentMainSectionIndex == index ? .blue.opacity(0.5) : .clear, radius: 2, x: 0, y: 0)
                                         .animation(.easeInOut(duration: 0.3), value: viewModel.currentMainSectionIndex)
                                     
                                     Spacer()
@@ -152,7 +150,7 @@ struct PathView: View {
     }
     
     // MARK: - Haptic Feedback Function
-    // Define the function inside the PathView struct
+    // Defined inside the PathView struct
     func triggerHaptic() {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
