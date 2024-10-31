@@ -1,3 +1,5 @@
+// ShoppingItem.swift
+
 import Foundation
 
 class ShoppingItem: Identifiable, ObservableObject, Equatable, Hashable {

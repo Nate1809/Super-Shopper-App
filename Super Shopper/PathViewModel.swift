@@ -1,3 +1,5 @@
+// PathViewModel.swift
+
 import Foundation
 import SwiftUI
 import Combine
@@ -15,10 +17,16 @@ class PathViewModel: ObservableObject {
     // MARK: - Store Layout
     let storeLayout: [StoreSection]
     
+    // MARK: - Combine Cancellables
+    private var cancellables = Set<AnyCancellable>()
+    
     // MARK: - Initialization
     init(categorizedItems: [MainCategory], selectedStore: String) {
         self.storeLayout = StoreLayout.layout(for: selectedStore)
         self.path = PathViewModel.computeOptimalPath(from: categorizedItems, with: storeLayout)
+        
+        // Observe changes to grabbedItems to automatically navigate
+        observeGrabbedItems()
     }
     
     // MARK: - Path Computation
@@ -29,14 +37,25 @@ class PathViewModel: ObservableObject {
             return MainCategory(name: mainCategory.name, subcategories: nonEmptySubcategories)
         }.filter { !$0.subcategories.isEmpty }
         
-        // Sort main categories based on store layout positions
+        // Sort main categories based on store layout positions (e.g., left to right, top to bottom)
         return filteredMainCategories.sorted { main1, main2 in
             guard let pos1 = storeLayout.first(where: { $0.category == main1.name })?.position,
                   let pos2 = storeLayout.first(where: { $0.category == main2.name })?.position else {
                 return main1.name < main2.name
             }
+            // Example sorting logic: ascending order based on x + y positions
             return (pos1.x + pos1.y) < (pos2.x + pos2.y)
         }
+    }
+    
+    // MARK: - Observation for Automatic Navigation
+    private func observeGrabbedItems() {
+        // Observe changes to grabbedItems
+        $grabbedItems
+            .sink { [weak self] _ in
+                self?.checkAndNavigate()
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - Check and Navigate Automatically
@@ -46,10 +65,14 @@ class PathViewModel: ObservableObject {
         let currentMainSection = path[currentMainSectionIndex]
         let allItemsGrabbed = currentMainSection.subcategories.flatMap { $0.items }.allSatisfy { grabbedItems.contains($0.id) }
         
-        if allItemsGrabbed, currentMainSectionIndex < path.count - 1 {
-            withAnimation {
+        print("Checking navigation: All items in section '\(currentMainSection.name)' grabbed? \(allItemsGrabbed)")
+        
+        if allItemsGrabbed {
+            if currentMainSectionIndex < path.count - 1 {
                 currentMainSectionIndex += 1
-                print("Automatically moved to next section with animation: \(path[currentMainSectionIndex].name)")
+                print("Automatically moved to next section: \(path[currentMainSectionIndex].name)")
+            } else {
+                print("All sections completed.")
             }
         }
     }

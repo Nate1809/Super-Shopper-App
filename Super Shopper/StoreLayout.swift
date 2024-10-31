@@ -1,3 +1,5 @@
+// StoreLayout.swift
+
 import Foundation
 
 struct StoreLayout {

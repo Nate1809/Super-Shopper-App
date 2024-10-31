@@ -1,3 +1,5 @@
+// StoreSection.swift
+
 import Foundation
 
 struct StoreSection: Identifiable, Hashable, Equatable {

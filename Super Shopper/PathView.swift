@@ -1,8 +1,10 @@
+// PathView.swift
+
 import SwiftUI
 
 struct PathView: View {
     @ObservedObject var viewModel: PathViewModel
-    @Namespace private var scrollNamespace
+    @Namespace private var animationNamespace
     @State private var scrollToID: UUID? = nil
     
     init(categorizedItems: [MainCategory], selectedStore: String) {
@@ -29,11 +31,15 @@ struct PathView: View {
                                         .font(.title2)
                                         .fontWeight(viewModel.currentMainSectionIndex == index ? .bold : .regular)
                                         .foregroundColor(viewModel.currentMainSectionIndex == index ? .blue : .primary)
+                                        .matchedGeometryEffect(id: "currentSection-\(mainCategory.id)", in: animationNamespace)
+                                    
                                     Spacer()
+                                    
                                     if viewModel.currentMainSectionIndex == index {
                                         Text("Current Section")
                                             .font(.subheadline)
                                             .foregroundColor(.blue)
+                                            // Removed matchedGeometryEffect to prevent overlapping
                                     }
                                 }
                                 .id(mainCategory.id) // For scrolling
@@ -56,8 +62,10 @@ struct PathView: View {
                                                     Text("Qty: \(item.quantity)")
                                                         .foregroundColor(viewModel.isItemGrabbed(item) ? .gray : .secondary)
                                                     Button(action: {
-                                                        viewModel.toggleItemGrabbed(item)
-                                                        triggerHaptic()
+                                                        withAnimation {
+                                                            viewModel.toggleItemGrabbed(item)
+                                                            triggerHaptic()
+                                                        }
                                                     }) {
                                                         Image(systemName: viewModel.isItemGrabbed(item) ? "checkmark.circle.fill" : "circle")
                                                             .foregroundColor(viewModel.isItemGrabbed(item) ? .green : .gray)
@@ -117,7 +125,8 @@ struct PathView: View {
                         .cornerRadius(10)
                 }
                 .disabled(viewModel.isFirstMainSection)
-
+                .accessibilityLabel("Move to previous section")
+    
                 Button(action: {
                     withAnimation {
                         viewModel.moveToNextMainSection()
@@ -133,6 +142,7 @@ struct PathView: View {
                         .cornerRadius(10)
                 }
                 .disabled(viewModel.isLastMainSection)
+                .accessibilityLabel("Move to next section")
             }
             .padding()
         }

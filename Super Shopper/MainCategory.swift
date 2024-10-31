@@ -1,3 +1,5 @@
+// MainCategory.swift
+
 import Foundation
 
 struct MainCategory: Identifiable, Hashable {
