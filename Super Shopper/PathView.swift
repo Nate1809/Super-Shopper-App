@@ -24,12 +24,13 @@ struct PathView: View {
                     LazyVStack(alignment: .leading, spacing: 20) {
                         ForEach(Array(viewModel.path.enumerated()), id: \.element.id) { mainIndex, mainCategory in
                             VStack(alignment: .leading, spacing: 10) {
-                                // Main Section Header
+                                // Main Section Header without Bolding
                                 HStack {
                                     Text(mainCategory.name)
                                         .font(.title2)
-                                        .fontWeight(viewModel.currentMainSectionIndex == mainIndex ? .bold : .regular)
                                         .foregroundColor(viewModel.currentMainSectionIndex == mainIndex ? .blue : .primary)
+                                        .scaleEffect(viewModel.currentMainSectionIndex == mainIndex ? 1.05 : 1.0)
+                                        .animation(.easeInOut(duration: 0.3), value: viewModel.currentMainSectionIndex)
                                     
                                     Spacer()
                                     
@@ -40,15 +41,16 @@ struct PathView: View {
                                     }
                                 }
                                 .id(mainCategory.id) // For scrolling
-                                
+                
                                 // Sub-Sections
                                 ForEach(Array(mainCategory.subcategories.enumerated()), id: \.element.id) { subIndex, subCategory in
                                     VStack(alignment: .leading, spacing: 5) {
                                         HStack {
                                             Text(subCategory.name)
                                                 .font(.headline)
-                                                .fontWeight(viewModel.currentMainSectionIndex == mainIndex && viewModel.currentSubSectionIndex == subIndex ? .bold : .regular)
                                                 .foregroundColor(viewModel.currentMainSectionIndex == mainIndex && viewModel.currentSubSectionIndex == subIndex ? .green : .secondary)
+                                                .scaleEffect(viewModel.currentMainSectionIndex == mainIndex && viewModel.currentSubSectionIndex == subIndex ? 1.05 : 1.0)
+                                                .animation(.easeInOut(duration: 0.3), value: viewModel.currentSubSectionIndex)
                                             
                                             Spacer()
                                             
@@ -171,6 +173,7 @@ struct PathView: View {
     }
     
     // MARK: - Haptic Feedback Function
+    // Defined inside the PathView struct to ensure proper scope
     func triggerHaptic() {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
