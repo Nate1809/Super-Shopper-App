@@ -8,6 +8,7 @@ class PathViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var path: [MainCategory] = []
     @Published var currentMainSectionIndex: Int = 0
+    @Published var currentSubSectionIndex: Int = 0
     @Published var grabbedItems: Set<UUID> = [] {
         didSet {
             checkAndNavigate()
@@ -63,33 +64,55 @@ class PathViewModel: ObservableObject {
         guard currentMainSectionIndex < path.count else { return }
         
         let currentMainSection = path[currentMainSectionIndex]
-        let allItemsGrabbed = currentMainSection.subcategories.flatMap { $0.items }.allSatisfy { grabbedItems.contains($0.id) }
         
-        print("Checking navigation: All items in section '\(currentMainSection.name)' grabbed? \(allItemsGrabbed)")
+        guard currentSubSectionIndex < currentMainSection.subcategories.count else { return }
+        
+        let currentSubSection = currentMainSection.subcategories[currentSubSectionIndex]
+        
+        let allItemsGrabbed = currentSubSection.items.allSatisfy { grabbedItems.contains($0.id) }
+        
+        print("Checking navigation: All items in sub-section '\(currentSubSection.name)' grabbed? \(allItemsGrabbed)")
         
         if allItemsGrabbed {
+            moveToNextSubSection()
+        }
+    }
+    
+    // MARK: - Navigation Methods
+    func moveToNextSubSection() {
+        guard currentMainSectionIndex < path.count else { return }
+        
+        let currentMainSection = path[currentMainSectionIndex]
+        
+        if currentSubSectionIndex < currentMainSection.subcategories.count - 1 {
+            currentSubSectionIndex += 1
+            print("Moved to next sub-section: \(currentMainSection.subcategories[currentSubSectionIndex].name)")
+        } else {
+            // Move to next main section
             if currentMainSectionIndex < path.count - 1 {
                 currentMainSectionIndex += 1
-                print("Automatically moved to next section: \(path[currentMainSectionIndex].name)")
+                currentSubSectionIndex = 0
+                print("Moved to next main section: \(path[currentMainSectionIndex].name)")
             } else {
                 print("All sections completed.")
             }
         }
     }
-
     
-    // MARK: - Navigation Methods
-    func moveToNextMainSection() {
-        if currentMainSectionIndex < path.count - 1 {
-            currentMainSectionIndex += 1
-            print("Moved to next section: \(path[currentMainSectionIndex].name)")
-        }
-    }
-    
-    func moveToPreviousMainSection() {
-        if currentMainSectionIndex > 0 {
-            currentMainSectionIndex -= 1
-            print("Moved to previous section: \(path[currentMainSectionIndex].name)")
+    func moveToPreviousSubSection() {
+        guard currentMainSectionIndex < path.count else { return }
+        
+        if currentSubSectionIndex > 0 {
+            currentSubSectionIndex -= 1
+            print("Moved to previous sub-section: \(path[currentMainSectionIndex].subcategories[currentSubSectionIndex].name)")
+        } else {
+            // Move to previous main section
+            if currentMainSectionIndex > 0 {
+                currentMainSectionIndex -= 1
+                let previousMainSection = path[currentMainSectionIndex]
+                currentSubSectionIndex = previousMainSection.subcategories.count - 1
+                print("Moved to previous main section: \(path[currentMainSectionIndex].name)")
+            }
         }
     }
     
@@ -106,16 +129,21 @@ class PathViewModel: ObservableObject {
         grabbedItems.contains(item.id)
     }
     
-    // MARK: - Current Main Section
+    // MARK: - Current Main and Sub Section
     var currentMainSection: MainCategory {
         path[currentMainSectionIndex]
     }
     
-    var isFirstMainSection: Bool {
-        currentMainSectionIndex == 0
+    var currentSubSection: SubCategory {
+        currentMainSection.subcategories[currentSubSectionIndex]
     }
     
-    var isLastMainSection: Bool {
-        currentMainSectionIndex >= path.count - 1
+    var isFirstSubSection: Bool {
+        currentMainSectionIndex == 0 && currentSubSectionIndex == 0
+    }
+    
+    var isLastSubSection: Bool {
+        currentMainSectionIndex >= path.count - 1 &&
+        currentSubSectionIndex >= currentMainSection.subcategories.count - 1
     }
 }

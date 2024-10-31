@@ -22,34 +22,44 @@ struct PathView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 20) {
-                        ForEach(Array(viewModel.path.enumerated()), id: \.element.id) { index, mainCategory in
+                        ForEach(Array(viewModel.path.enumerated()), id: \.element.id) { mainIndex, mainCategory in
                             VStack(alignment: .leading, spacing: 10) {
-                                // Main Section Header with Scaling Animation
+                                // Main Section Header
                                 HStack {
                                     Text(mainCategory.name)
                                         .font(.title2)
-                                        .fontWeight(.regular)
-                                        .foregroundColor(viewModel.currentMainSectionIndex == index ? .blue : .primary)
-                                        .scaleEffect(viewModel.currentMainSectionIndex == index ? 1.05 : 1.0)
-                                        .animation(.easeInOut(duration: 0.3), value: viewModel.currentMainSectionIndex)
+                                        .fontWeight(viewModel.currentMainSectionIndex == mainIndex ? .bold : .regular)
+                                        .foregroundColor(viewModel.currentMainSectionIndex == mainIndex ? .blue : .primary)
                                     
                                     Spacer()
                                     
-                                    if viewModel.currentMainSectionIndex == index {
-                                        Text("Current Section")
+                                    if viewModel.currentMainSectionIndex == mainIndex {
+                                        Text("Current Main Section")
                                             .font(.subheadline)
                                             .foregroundColor(.blue)
                                     }
                                 }
                                 .id(mainCategory.id) // For scrolling
-                
+                                
                                 // Sub-Sections
-                                ForEach(mainCategory.subcategories) { subCategory in
+                                ForEach(Array(mainCategory.subcategories.enumerated()), id: \.element.id) { subIndex, subCategory in
                                     VStack(alignment: .leading, spacing: 5) {
-                                        Text(subCategory.name)
-                                            .font(.headline)
-                                            .foregroundColor(.secondary)
-                
+                                        HStack {
+                                            Text(subCategory.name)
+                                                .font(.headline)
+                                                .fontWeight(viewModel.currentMainSectionIndex == mainIndex && viewModel.currentSubSectionIndex == subIndex ? .bold : .regular)
+                                                .foregroundColor(viewModel.currentMainSectionIndex == mainIndex && viewModel.currentSubSectionIndex == subIndex ? .green : .secondary)
+                                            
+                                            Spacer()
+                                            
+                                            if viewModel.currentMainSectionIndex == mainIndex && viewModel.currentSubSectionIndex == subIndex {
+                                                Text("Current Sub-Section")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.green)
+                                            }
+                                        }
+                                        .id(subCategory.id) // For scrolling
+                                        
                                         // Items List
                                         VStack(alignment: .leading, spacing: 5) {
                                             ForEach(subCategory.items) { item in
@@ -87,10 +97,11 @@ struct PathView: View {
                             }
                             .padding(.horizontal)
                             .onAppear {
-                                // Automatically scroll to current section
-                                if viewModel.currentMainSectionIndex == index {
+                                // Automatically scroll to current sub-section
+                                if viewModel.currentMainSectionIndex == mainIndex {
+                                    let subCategory = viewModel.path[mainIndex].subcategories[viewModel.currentSubSectionIndex]
                                     withAnimation {
-                                        proxy.scrollTo(mainCategory.id, anchor: .top)
+                                        proxy.scrollTo(subCategory.id, anchor: .top)
                                     }
                                 }
                             }
@@ -98,11 +109,20 @@ struct PathView: View {
                     }
                     .padding(.top)
                 }
-                .onChange(of: viewModel.currentMainSectionIndex) { newIndex in
-                    if newIndex < viewModel.path.count {
-                        let mainCategory = viewModel.path[newIndex]
+                .onChange(of: viewModel.currentMainSectionIndex) { newMainIndex in
+                    if newMainIndex < viewModel.path.count {
+                        let mainCategory = viewModel.path[newMainIndex]
+                        let subCategory = mainCategory.subcategories[viewModel.currentSubSectionIndex]
                         withAnimation {
-                            proxy.scrollTo(mainCategory.id, anchor: .top)
+                            proxy.scrollTo(subCategory.id, anchor: .top)
+                        }
+                    }
+                }
+                .onChange(of: viewModel.currentSubSectionIndex) { newSubIndex in
+                    if newSubIndex < viewModel.path[viewModel.currentMainSectionIndex].subcategories.count {
+                        let subCategory = viewModel.path[viewModel.currentMainSectionIndex].subcategories[newSubIndex]
+                        withAnimation {
+                            proxy.scrollTo(subCategory.id, anchor: .top)
                         }
                     }
                 }
@@ -112,7 +132,7 @@ struct PathView: View {
             HStack {
                 Button(action: {
                     withAnimation {
-                        viewModel.moveToPreviousMainSection()
+                        viewModel.moveToPreviousSubSection()
                         triggerHaptic()
                     }
                 }) {
@@ -120,16 +140,16 @@ struct PathView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(viewModel.isFirstMainSection ? Color.gray : Color.blue)
+                        .background(viewModel.isFirstSubSection ? Color.gray : Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
-                .disabled(viewModel.isFirstMainSection)
+                .disabled(viewModel.isFirstSubSection)
                 .accessibilityLabel("Move to previous section")
     
                 Button(action: {
                     withAnimation {
-                        viewModel.moveToNextMainSection()
+                        viewModel.moveToNextSubSection()
                         triggerHaptic()
                     }
                 }) {
@@ -137,11 +157,11 @@ struct PathView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(viewModel.isLastMainSection ? Color.gray : Color.blue)
+                        .background(viewModel.isLastSubSection ? Color.gray : Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
-                .disabled(viewModel.isLastMainSection)
+                .disabled(viewModel.isLastSubSection)
                 .accessibilityLabel("Move to next section")
             }
             .padding()
@@ -151,7 +171,6 @@ struct PathView: View {
     }
     
     // MARK: - Haptic Feedback Function
-    // Defined inside the PathView struct to ensure proper scope
     func triggerHaptic() {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
