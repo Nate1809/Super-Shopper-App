@@ -4,7 +4,6 @@ import SwiftUI
 
 struct PathView: View {
     @ObservedObject var viewModel: PathViewModel
-    @Namespace private var animationNamespace
     @State private var scrollToID: UUID? = nil
     
     init(categorizedItems: [MainCategory], selectedStore: String) {
@@ -25,13 +24,15 @@ struct PathView: View {
                     LazyVStack(alignment: .leading, spacing: 20) {
                         ForEach(Array(viewModel.path.enumerated()), id: \.element.id) { index, mainCategory in
                             VStack(alignment: .leading, spacing: 10) {
-                                // Main Section Header
+                                // Main Section Header with Simulated Bolding
                                 HStack {
                                     Text(mainCategory.name)
                                         .font(.title2)
-                                        .fontWeight(viewModel.currentMainSectionIndex == index ? .bold : .regular)
+                                        .fontWeight(.regular)
                                         .foregroundColor(viewModel.currentMainSectionIndex == index ? .blue : .primary)
-                                        .matchedGeometryEffect(id: "currentSection-\(mainCategory.id)", in: animationNamespace)
+                                        .scaleEffect(viewModel.currentMainSectionIndex == index ? 1.05 : 1.0)
+                                        .shadow(color: viewModel.currentMainSectionIndex == index ? .blue.opacity(0.5) : .clear, radius: 2, x: 0, y: 0)
+                                        .animation(.easeInOut(duration: 0.3), value: viewModel.currentMainSectionIndex)
                                     
                                     Spacer()
                                     
@@ -39,7 +40,6 @@ struct PathView: View {
                                         Text("Current Section")
                                             .font(.subheadline)
                                             .foregroundColor(.blue)
-                                            // Removed matchedGeometryEffect to prevent overlapping
                                     }
                                 }
                                 .id(mainCategory.id) // For scrolling
@@ -71,6 +71,7 @@ struct PathView: View {
                                                             .foregroundColor(viewModel.isItemGrabbed(item) ? .green : .gray)
                                                     }
                                                     .buttonStyle(BorderlessButtonStyle())
+                                                    .accessibilityLabel(viewModel.isItemGrabbed(item) ? "Uncheck \(item.name)" : "Check \(item.name)")
                                                 }
                                                 .padding(.vertical, 4)
                                                 .padding(.horizontal, 8)
@@ -150,36 +151,37 @@ struct PathView: View {
         .padding(.bottom)
     }
     
-    /// Triggers haptic feedback using UIImpactFeedbackGenerator
+    // MARK: - Haptic Feedback Function
+    // Define the function inside the PathView struct
     func triggerHaptic() {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
         generator.impactOccurred()
     }
-}
-
-#Preview {
-    let sampleItems1 = [
-        ShoppingItem(name: "Apple", quantity: 2),
-        ShoppingItem(name: "Banana", quantity: 3)
-    ]
-    let sampleItems2 = [
-        ShoppingItem(name: "Milk", quantity: 1),
-        ShoppingItem(name: "Cheese", quantity: 2)
-    ]
-    let sampleItems3 = [
-        ShoppingItem(name: "Shampoo", quantity: 1),
-        ShoppingItem(name: "Conditioner", quantity: 1)
-    ]
-    let sampleMainCategories = [
-        MainCategory(name: "Groceries", subcategories: [
-            SubCategory(name: "Fruits", items: sampleItems1),
-            SubCategory(name: "Dairy", items: sampleItems2)
-        ]),
-        MainCategory(name: "Beauty", subcategories: [
-            SubCategory(name: "Hair Care", items: sampleItems3)
-        ])
-    ]
     
-    PathView(categorizedItems: sampleMainCategories, selectedStore: "Target")
+    #Preview {
+        let sampleItems1 = [
+            ShoppingItem(name: "Apple", quantity: 2),
+            ShoppingItem(name: "Banana", quantity: 3)
+        ]
+        let sampleItems2 = [
+            ShoppingItem(name: "Milk", quantity: 1),
+            ShoppingItem(name: "Cheese", quantity: 2)
+        ]
+        let sampleItems3 = [
+            ShoppingItem(name: "Shampoo", quantity: 1),
+            ShoppingItem(name: "Conditioner", quantity: 1)
+        ]
+        let sampleMainCategories = [
+            MainCategory(name: "Groceries", subcategories: [
+                SubCategory(name: "Fruits", items: sampleItems1),
+                SubCategory(name: "Dairy", items: sampleItems2)
+            ]),
+            MainCategory(name: "Beauty", subcategories: [
+                SubCategory(name: "Hair Care", items: sampleItems3)
+            ])
+        ]
+        
+        PathView(categorizedItems: sampleMainCategories, selectedStore: "Target")
+    }
 }
