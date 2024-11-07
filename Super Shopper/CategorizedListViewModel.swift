@@ -1,7 +1,7 @@
-// CategorizedListViewModel.swift
-
 import Foundation
 import SwiftUI
+import CoreML
+import NaturalLanguage
 
 class CategorizedListViewModel: ObservableObject {
     // MARK: - Published Properties
@@ -12,20 +12,8 @@ class CategorizedListViewModel: ObservableObject {
     @Published var selectedItem: ShoppingItem? = nil
     @Published var mainCategoriesList: [MainCategory] = []
     
-    // MARK: - Category Mappings
-    private let categoryMappings: [String: (main: String, sub: String)] = [
-        "flour": ("Groceries", "Flours"),
-        "milk": ("Groceries", "Dairy"),
-        "apple": ("Groceries", "Fruits"),
-        "bread": ("Groceries", "Bakery"),
-        "chicken": ("Groceries", "Meat"),
-        "salmon": ("Groceries", "Seafood"),
-        "detergent": ("Cleaning", "Detergents"),
-        "shampoo": ("Beauty", "Hair Care"),
-        "conditioner": ("Beauty", "Hair Care"),
-        "toothpaste": ("Beauty", "Personal Hygiene")
-        // Add more mappings as needed
-    ]
+    // MARK: - ML Model
+    private let productClassifier = ProductCategoryClassifier()
     
     // MARK: - Initializer
     init(shoppingItems: [ShoppingItem], selectedStore: String) {
@@ -36,70 +24,78 @@ class CategorizedListViewModel: ObservableObject {
     
     // MARK: - Categorization Logic
     func categorizeItems() {
-        // Define main categories and their subcategories
-        var tempCategorizedItems: [MainCategory] = [
-            MainCategory(name: "Groceries", subcategories: [
-                SubCategory(name: "Flours"),
-                SubCategory(name: "Fruits"),
-                SubCategory(name: "Dairy"),
-                SubCategory(name: "Bakery"),
-                SubCategory(name: "Meat"),
-                SubCategory(name: "Seafood")
-            ]),
-            MainCategory(name: "Beauty", subcategories: [
-                SubCategory(name: "Hair Care"),
-                SubCategory(name: "Skincare"),
-                SubCategory(name: "Personal Hygiene")
-            ]),
-            MainCategory(name: "Cleaning", subcategories: [
-                SubCategory(name: "Detergents"),
-                SubCategory(name: "Cleaning Tools")
-            ]),
-            MainCategory(name: "Menswear", subcategories: [
-                SubCategory(name: "Shirts"),
-                SubCategory(name: "Pants"),
-                SubCategory(name: "Accessories")
-            ]),
-            MainCategory(name: "Other", subcategories: [
-                SubCategory(name: "Miscellaneous")
-            ])
-        ]
-        
+        // Initialize main categories with empty subcategories
+        var tempCategorizedItems: [MainCategory] = []
+
+        // Get unique categories from the model's labels
+        let uniqueCategories = Set(productClassifier.model.modelDescription.classLabels as? [String] ?? [])
+
+        // Create main categories and subcategories based on the model's labels
+        for category in uniqueCategories {
+            // Split main category and subcategory if needed
+            // Assuming categories are in the format "MainCategory / SubCategory"
+            let components = category.components(separatedBy: " / ")
+            let mainCategoryName = components.first ?? "Other"
+            let subCategoryName = components.count > 1 ? components[1] : "Miscellaneous"
+
+            // Find or create the main category
+            if let mainIndex = tempCategorizedItems.firstIndex(where: { $0.name == mainCategoryName }) {
+                // Main category exists, add subcategory if needed
+                if !tempCategorizedItems[mainIndex].subcategories.contains(where: { $0.name == subCategoryName }) {
+                    tempCategorizedItems[mainIndex].subcategories.append(SubCategory(name: subCategoryName))
+                }
+            } else {
+                // Create new main category with subcategory
+                let newMainCategory = MainCategory(name: mainCategoryName, subcategories: [SubCategory(name: subCategoryName)])
+                tempCategorizedItems.append(newMainCategory)
+            }
+        }
+
         // Initialize items in subcategories
         for i in 0..<tempCategorizedItems.count {
             for j in 0..<tempCategorizedItems[i].subcategories.count {
                 tempCategorizedItems[i].subcategories[j].items = []
             }
         }
-        
-        // Assign items to categories based on mapping
+
+        // Assign items to categories using the ML model
         for item in shoppingItems {
-            let lowercasedName = item.name.lowercased()
-            var assigned = false
-            
-            for (keyword, (main, sub)) in categoryMappings {
-                if lowercasedName.contains(keyword) {
-                    if let mainIndex = tempCategorizedItems.firstIndex(where: { $0.name == main }) {
-                        if let subIndex = tempCategorizedItems[mainIndex].subcategories.firstIndex(where: { $0.name == sub }) {
-                            tempCategorizedItems[mainIndex].subcategories[subIndex].items.append(item)
-                            assigned = true
-                            break
-                        }
-                    }
+            let categoryLabel = predictCategory(for: item.name)
+            let components = categoryLabel.components(separatedBy: " / ")
+            let mainCategoryName = components.first ?? "Other"
+            let subCategoryName = components.count > 1 ? components[1] : "Miscellaneous"
+
+            // Find the main category
+            if let mainIndex = tempCategorizedItems.firstIndex(where: { $0.name == mainCategoryName }) {
+                // Find the subcategory
+                if let subIndex = tempCategorizedItems[mainIndex].subcategories.firstIndex(where: { $0.name == subCategoryName }) {
+                    tempCategorizedItems[mainIndex].subcategories[subIndex].items.append(item)
+                } else {
+                    // If subcategory doesn't exist, create it
+                    let newSubCategory = SubCategory(name: subCategoryName, items: [item])
+                    tempCategorizedItems[mainIndex].subcategories.append(newSubCategory)
                 }
-            }
-            
-            if !assigned {
-                // Assign to "Other > Miscellaneous"
-                if let otherMainIndex = tempCategorizedItems.firstIndex(where: { $0.name == "Other" }) {
-                    if let miscSubIndex = tempCategorizedItems[otherMainIndex].subcategories.firstIndex(where: { $0.name == "Miscellaneous" }) {
-                        tempCategorizedItems[otherMainIndex].subcategories[miscSubIndex].items.append(item)
-                    }
-                }
+            } else {
+                // If main category doesn't exist, create it
+                let newSubCategory = SubCategory(name: subCategoryName, items: [item])
+                let newMainCategory = MainCategory(name: mainCategoryName, subcategories: [newSubCategory])
+                tempCategorizedItems.append(newMainCategory)
             }
         }
-        
+
+        // Update the published property
         self.categorizedItems = tempCategorizedItems
+    }
+    
+    // MARK: - Prediction Function
+    private func predictCategory(for productName: String) -> String {
+        do {
+            let prediction = try productClassifier.prediction(text: productName)
+            return prediction.label
+        } catch {
+            print("Error predicting category for '\(productName)': \(error)")
+            return "Other / Miscellaneous" // Default category in case of an error
+        }
     }
     
     // MARK: - Category Management
@@ -116,7 +112,6 @@ class CategorizedListViewModel: ObservableObject {
         return buttons
     }
 
-    
     func reassignItem(toMain main: String, toSub sub: String) {
         guard let item = selectedItem else { return }
         
@@ -134,7 +129,16 @@ class CategorizedListViewModel: ObservableObject {
         if let mainIndex = categorizedItems.firstIndex(where: { $0.name == main }) {
             if let subIndex = categorizedItems[mainIndex].subcategories.firstIndex(where: { $0.name == sub }) {
                 categorizedItems[mainIndex].subcategories[subIndex].items.append(item)
+            } else {
+                // If subcategory doesn't exist, create it
+                let newSubCategory = SubCategory(name: sub, items: [item])
+                categorizedItems[mainIndex].subcategories.append(newSubCategory)
             }
+        } else {
+            // If main category doesn't exist, create it
+            let newSubCategory = SubCategory(name: sub, items: [item])
+            let newMainCategory = MainCategory(name: main, subcategories: [newSubCategory])
+            categorizedItems.append(newMainCategory)
         }
         
         // Reset selection
