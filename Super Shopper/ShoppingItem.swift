@@ -1,11 +1,13 @@
-// ShoppingItem.swift
-
 import Foundation
 
 class ShoppingItem: Identifiable, ObservableObject, Equatable, Hashable {
     let id = UUID()
     @Published var name: String
     @Published var quantity: Int
+
+    // Properties to store user-assigned categories
+    @Published var userAssignedMainCategory: String?
+    @Published var userAssignedSubCategory: String?
 
     init(name: String, quantity: Int) {
         self.name = name
@@ -16,7 +18,7 @@ class ShoppingItem: Identifiable, ObservableObject, Equatable, Hashable {
     static func == (lhs: ShoppingItem, rhs: ShoppingItem) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
     // Hashable Protocol
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
