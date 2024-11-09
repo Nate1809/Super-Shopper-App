@@ -31,6 +31,10 @@ struct PathView: View {
                                         .foregroundColor(viewModel.currentAisleIndex == viewModel.path.firstIndex(of: aisleCategory) ? .blue : .primary)
                                         .scaleEffect(viewModel.currentAisleIndex == viewModel.path.firstIndex(of: aisleCategory) ? 1.05 : 1.0)
                                         .animation(.easeInOut(duration: 0.3), value: viewModel.currentAisleIndex)
+                                        .padding(.leading) // Add padding to the left
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.8)
+                                        .allowsTightening(true)
 
                                     Spacer()
 
@@ -38,6 +42,7 @@ struct PathView: View {
                                         Text("Current Aisle")
                                             .font(.subheadline)
                                             .foregroundColor(.blue)
+                                            .padding(.trailing)
                                     }
                                 }
                                 .id(aisleCategory.id) // For scrolling
@@ -75,15 +80,16 @@ struct PathView: View {
                                 .background(Color.gray.opacity(0.05))
                                 .cornerRadius(10)
                             }
+                            .padding(.horizontal) // Add horizontal padding to the entire aisle section
                         }
                         .padding(.top)
                     }
-                }
-                .onChange(of: viewModel.currentAisleIndex) { newAisleIndex in
-                    if newAisleIndex < viewModel.path.count {
-                        let aisle = viewModel.path[newAisleIndex]
-                        withAnimation {
-                            proxy.scrollTo(aisle.id, anchor: .top)
+                    .onChange(of: viewModel.currentAisleIndex) { newAisleIndex in
+                        if newAisleIndex < viewModel.path.count {
+                            let aisle = viewModel.path[newAisleIndex]
+                            withAnimation {
+                                proxy.scrollTo(aisle.id, anchor: .top)
+                            }
                         }
                     }
                 }
