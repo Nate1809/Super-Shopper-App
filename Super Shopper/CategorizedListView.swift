@@ -1,12 +1,20 @@
-// CategorizedListView.swift
-
 import SwiftUI
 
 struct CategorizedListView: View {
     @ObservedObject var viewModel: CategorizedListViewModel
+    @StateObject var pathViewModel: PathViewModel
 
     init(shoppingItems: [ShoppingItem], selectedStore: String) {
-        self.viewModel = CategorizedListViewModel(shoppingItems: shoppingItems, selectedStore: selectedStore)
+        // Initialize viewModel first
+        let vm = CategorizedListViewModel(shoppingItems: shoppingItems, selectedStore: selectedStore)
+        vm.categorizeItems() // Ensure categorizedItems is populated
+        self._viewModel = ObservedObject(wrappedValue: vm)
+        
+        // Now initialize pathViewModel using the populated categorizedItems
+        self._pathViewModel = StateObject(wrappedValue: PathViewModel(
+            categorizedItems: vm.categorizedItems,
+            selectedStore: selectedStore
+        ))
     }
 
     var body: some View {
@@ -53,8 +61,7 @@ struct CategorizedListView: View {
             .listStyle(PlainListStyle())
 
             NavigationLink(destination: PathView(
-                categorizedItems: viewModel.categorizedItems,
-                selectedStore: viewModel.selectedStore
+                viewModel: pathViewModel // Pass the existing pathViewModel
             )) {
                 Text(showOptimalPathButtonLabel)
                     .font(.headline)
@@ -70,8 +77,12 @@ struct CategorizedListView: View {
         }
         .navigationTitle("Categorized Items")
         .onAppear {
-            viewModel.categorizeItems()
+            // Update mainCategoriesList if needed
             viewModel.mainCategoriesList = viewModel.categorizedItems
+        }
+        .onChange(of: viewModel.categorizedItems) { newCategorizedItems in
+            // Update the path in pathViewModel when categorizedItems change
+            pathViewModel.updatePath(categorizedItems: newCategorizedItems)
         }
         .actionSheet(isPresented: $viewModel.showCategoryPicker) {
             ActionSheet(

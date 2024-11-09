@@ -1,16 +1,10 @@
-// PathView.swift
-
 import SwiftUI
-import ConfettiSwiftUI // Import the ConfettiSwiftUI package
+import ConfettiSwiftUI
 
 struct PathView: View {
-    @ObservedObject var viewModel: PathViewModel
+    @ObservedObject var viewModel: PathViewModel // Receive the PathViewModel as a parameter
     @State private var scrollToAisle: UUID? = nil
-    @State private var confettiCounter: Int = 0 // State variable for confetti
-
-    init(categorizedItems: [MainCategory], selectedStore: String) {
-        self.viewModel = PathViewModel(categorizedItems: categorizedItems, selectedStore: selectedStore)
-    }
+    @State private var confettiCounter: Int = 0
 
     var body: some View {
         ZStack {
@@ -263,5 +257,8 @@ struct ItemRowView: View {
         ])
     ]
 
-    PathView(categorizedItems: sampleMainCategories, selectedStore: "Target")
+    // Initialize PathViewModel
+    let pathViewModel = PathViewModel(categorizedItems: sampleMainCategories, selectedStore: "Target")
+
+    return PathView(viewModel: pathViewModel)
 }
