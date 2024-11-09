@@ -1,196 +1,188 @@
+// CategoryMappings.swift
+
 import Foundation
 
 struct CategoryMappings {
-    // Store-specific mappings
+    // Store-specific category to main category mappings
     static let mappings: [String: [String: String]] = [
-        "Generic Store": genericMapping,
         "Target": targetMapping,
-        "Whole Foods": wholeFoodsMapping
+        "Generic Store": genericMapping
         // Add other stores as needed
     ]
     
-    // Generic Store Mapping
-    static let genericMapping: [String: String] = [
-        // Grocery
-        "Pasta, Rice & Grains": "Grocery",
-        "Spices & Seasonings": "Grocery",
-        "Canned & Jarred Goods": "Grocery",
-        "International Foods": "Grocery",
-        "Beans & Legumes": "Grocery",
-        "Baking Supplies": "Grocery",
-        "Condiments & Sauces": "Grocery",
-        "Cooking Fats & Oils": "Grocery",
-        "Soups & Broths": "Grocery",
-        "Prepared Foods": "Grocery",
-        "Breakfast": "Grocery",
-        "Spreads & Syrups": "Grocery",
-        // Produce
-        "Produce": "Produce",
-        // Meat & Seafood
-        "Meat & Poultry": "Meat & Seafood",
-        "Seafood": "Meat & Seafood",
-        // Dairy
-        "Dairy": "Dairy",
-        // Bakery
-        "Bakery": "Bakery",
-        "Desserts": "Bakery",
-        // Frozen Foods
-        "Frozen Foods": "Frozen Foods",
-        // Beverages
-        "Water & Sparkling Water": "Beverages",
-        "Juices & Smoothies": "Beverages",
-        "Soda & Soft Drinks": "Beverages",
-        "Coffee & Tea": "Beverages",
-        "Non-Alcoholic Beverages": "Beverages",
-        "Alcoholic Beverages": "Beverages",
-        "Functional Beverages": "Beverages",
-        "Drink Mixes & Powders": "Beverages",
-        // Snacks
-        "Snacks": "Snacks",
-        "Candy & Confectionery": "Snacks",
-        "Chips & Fries": "Snacks",
-        "Popcorn & Puffed Snacks": "Snacks",
-        "Granola & Energy Bars": "Snacks",
-        "Nuts & Seeds": "Snacks",
-        "Jerky & Dried Meats": "Snacks",
-        // Health & Personal Care
-        "Vitamins & Supplements": "Health & Personal Care",
-        "Health & Wellness": "Health & Personal Care",
-        "Pharmacy": "Health & Personal Care",
-        "Bath & Body": "Health & Personal Care",
-        "Protein & Meal Replacements": "Health & Personal Care",
-        // Household Items
-        "Office Supplies": "Household Items",
-        "Household Cleaning": "Household Items",
-        "Household Appliances": "Household Items",
-        "Furniture": "Household Items",
-        "Gardening Supplies": "Household Items",
-        // Baby Products
-        "Baby Products": "Baby Products",
-        // Pet Supplies
-        "Pet Supplies": "Pet Supplies",
-        // Other
-        "Sports & Outdoors": "Other"
-        // If any subsections are not mapped, they will default to "Other"
+    // Store-specific subcategory to aisle mappings
+    static let aisleMappings: [String: [String: String]] = [
+        "Target": targetAisleMapping,
+        "Generic Store": genericAisleMapping
+        // Add other stores as needed
     ]
     
-    // Target Mapping
+    // MARK: - ML Model Labels
+    // Ensure these labels match exactly with your ML model's output
+    static let mlModelLabels: [String] = [
+        "Candy & Confectionery", "Dairy", "Snacks", "Produce",
+        "Water & Sparkling Water", "Bakery", "Frozen Foods", "Meat & Poultry",
+        "Spices & Seasonings", "Coffee & Tea", "Condiments & Sauces",
+        "International Foods", "Baking Supplies", "Seafood", "Health & Wellness",
+        "Pasta, Rice & Grains", "Canned & Jarred Goods", "Cooking Fats & Oils",
+        "Non-Alcoholic Beverages", "Breakfast", "Soda & Soft Drinks", "Desserts",
+        "Spreads & Syrups", "Alcoholic Beverages", "Chips & Fries", "Soups & Broths",
+        "Juices & Smoothies", "Drink Mixes & Powders", "Prepared Foods",
+        "Jerky & Dried Meats", "Protein & Meal Replacements", "Beans & Legumes",
+        "Functional Beverages", "Household Cleaning", "Popcorn & Puffed Snacks",
+        "Granola & Energy Bars", "Nuts & Seeds", "Pharmacy", "Office Supplies",
+        "Vitamins & Supplements", "Baby Products", "Sports & Outdoors",
+        "Household Appliances", "Bath & Body", "Furniture", "Pet Supplies",
+        "Gardening Supplies"
+    ]
+    
+    // MARK: - Target Mappings
+    
+    // Subcategory to Main Category Mapping for Target
     static let targetMapping: [String: String] = [
-        // Food & Beverages
-        "Pasta, Rice & Grains": "Food & Beverages",
-        "Spices & Seasonings": "Food & Beverages",
-        "Canned & Jarred Goods": "Food & Beverages",
-        "International Foods": "Food & Beverages",
-        "Beans & Legumes": "Food & Beverages",
-        "Baking Supplies": "Food & Beverages",
-        "Condiments & Sauces": "Food & Beverages",
-        "Cooking Fats & Oils": "Food & Beverages",
-        "Soups & Broths": "Food & Beverages",
-        "Prepared Foods": "Food & Beverages",
-        "Breakfast": "Food & Beverages",
-        "Spreads & Syrups": "Food & Beverages",
-        "Produce": "Food & Beverages",
-        "Meat & Poultry": "Food & Beverages",
-        "Seafood": "Food & Beverages",
-        "Dairy": "Food & Beverages",
-        "Bakery": "Food & Beverages",
-        "Desserts": "Food & Beverages",
-        "Frozen Foods": "Food & Beverages",
-        "Water & Sparkling Water": "Food & Beverages",
-        "Juices & Smoothies": "Food & Beverages",
-        "Soda & Soft Drinks": "Food & Beverages",
-        "Coffee & Tea": "Food & Beverages",
-        "Non-Alcoholic Beverages": "Food & Beverages",
-        "Alcoholic Beverages": "Food & Beverages",
-        "Functional Beverages": "Food & Beverages",
-        "Drink Mixes & Powders": "Food & Beverages",
-        "Snacks": "Food & Beverages",
-        "Candy & Confectionery": "Food & Beverages",
-        "Chips & Fries": "Food & Beverages",
-        "Popcorn & Puffed Snacks": "Food & Beverages",
-        "Granola & Energy Bars": "Food & Beverages",
-        "Nuts & Seeds": "Food & Beverages",
-        "Jerky & Dried Meats": "Food & Beverages",
-        // Health & Personal Care
-        "Vitamins & Supplements": "Health & Personal Care",
-        "Health & Wellness": "Health & Personal Care",
-        "Pharmacy": "Health & Personal Care",
-        "Bath & Body": "Health & Personal Care",
-        "Protein & Meal Replacements": "Health & Personal Care",
+        // Grocery
+        "Candy & Confectionery": "Grocery",
+        "Dairy": "Grocery",
+        "Snacks": "Grocery",
+        "Produce": "Grocery",
+        "Water & Sparkling Water": "Grocery",
+        "Bakery": "Grocery",
+        "Frozen Foods": "Grocery",
+        "Meat & Poultry": "Grocery",
+        "Spices & Seasonings": "Grocery",
+        "Coffee & Tea": "Grocery",
+        "Condiments & Sauces": "Grocery",
+        "International Foods": "Grocery",
+        "Baking Supplies": "Grocery",
+        "Seafood": "Grocery",
+        "Pasta, Rice & Grains": "Grocery",
+        "Canned & Jarred Goods": "Grocery",
+        "Cooking Fats & Oils": "Grocery",
+        "Non-Alcoholic Beverages": "Grocery",
+        "Breakfast": "Grocery",
+        "Soda & Soft Drinks": "Grocery",
+        "Desserts": "Grocery",
+        "Spreads & Syrups": "Grocery",
+        "Alcoholic Beverages": "Grocery",
+        "Chips & Fries": "Grocery",
+        "Soups & Broths": "Grocery",
+        "Juices & Smoothies": "Grocery",
+        "Drink Mixes & Powders": "Grocery",
+        "Prepared Foods": "Grocery",
+        "Jerky & Dried Meats": "Grocery",
+        "Beans & Legumes": "Grocery",
+        "Functional Beverages": "Grocery",
+        "Popcorn & Puffed Snacks": "Grocery",
+        "Granola & Energy Bars": "Grocery",
+        "Nuts & Seeds": "Grocery",
+        
+        // Personal Care
+        "Protein & Meal Replacements": "Personal Care",
+        "Health & Wellness": "Health or Pharmacy",
+        "Pharmacy": "Health or Pharmacy",
+        "Vitamins & Supplements": "Health or Pharmacy",
+        "Bath & Body": "Personal Care",
+        
         // Household Essentials
-        "Office Supplies": "Household Essentials",
         "Household Cleaning": "Household Essentials",
         "Household Appliances": "Household Essentials",
-        "Furniture": "Household Essentials",
-        "Gardening Supplies": "Household Essentials",
-        // Baby Products
-        "Baby Products": "Baby Products",
-        // Pet Supplies
-        "Pet Supplies": "Pet Supplies",
+        "Furniture": "Furniture",
+        "Office Supplies": "School & Office Supplies",
+        "Gardening Supplies": "Outdoor Living & Garden",
+        
+        // Baby
+        "Baby Products": "Baby",
+        
+        // Pets
+        "Pet Supplies": "Pets",
+        
+        // Sports & Outdoors
+        "Sports & Outdoors": "Sports & Outdoors",
+        
         // Other
-        "Sports & Outdoors": "Other"
-        // If any subsections are not mapped, they will default to "Other"
+        "Other": "Other"
     ]
     
-    // Whole Foods Mapping
-    static let wholeFoodsMapping: [String: String] = [
-        // Produce
-        "Produce": "Produce",
-        // Meat & Seafood
-        "Meat & Poultry": "Meat & Seafood",
-        "Seafood": "Meat & Seafood",
-        // Dairy
-        "Dairy": "Dairy",
-        // Bakery
-        "Bakery": "Bakery",
-        "Desserts": "Bakery",
-        // Frozen Foods
-        "Frozen Foods": "Frozen Foods",
-        // Beverages
-        "Water & Sparkling Water": "Beverages",
-        "Juices & Smoothies": "Beverages",
-        "Soda & Soft Drinks": "Beverages",
-        "Coffee & Tea": "Beverages",
-        "Non-Alcoholic Beverages": "Beverages",
-        "Alcoholic Beverages": "Beverages",
-        "Functional Beverages": "Beverages",
-        "Drink Mixes & Powders": "Beverages",
-        // Snacks
-        "Snacks": "Snacks",
-        "Candy & Confectionery": "Snacks",
-        "Chips & Fries": "Snacks",
-        "Popcorn & Puffed Snacks": "Snacks",
-        "Granola & Energy Bars": "Snacks",
-        "Nuts & Seeds": "Snacks",
-        "Jerky & Dried Meats": "Snacks",
-        // Grocery
-        "Pasta, Rice & Grains": "Grocery",
-        "Spices & Seasonings": "Grocery",
-        "Canned & Jarred Goods": "Grocery",
-        "International Foods": "Grocery",
-        "Beans & Legumes": "Grocery",
-        "Baking Supplies": "Grocery",
-        "Condiments & Sauces": "Grocery",
-        "Cooking Fats & Oils": "Grocery",
-        "Soups & Broths": "Grocery",
-        "Prepared Foods": "Grocery",
-        "Breakfast": "Grocery",
-        "Spreads & Syrups": "Grocery",
-        // Health & Personal Care
-        "Vitamins & Supplements": "Health & Personal Care",
-        "Health & Wellness": "Health & Personal Care",
-        "Pharmacy": "Health & Personal Care",
-        "Bath & Body": "Health & Personal Care",
-        "Protein & Meal Replacements": "Health & Personal Care",
+    // Subcategory to Aisle Mapping for Target
+    static let targetAisleMapping: [String: String] = [
+        // Aisle 1: Fresh Produce
+        "Produce": "Aisle 1: Fresh Produce",
+        
+        // Aisle 2: Dairy Products
+        "Dairy": "Aisle 2: Dairy Products",
+        
+        // Aisle 3: Meats and Seafood
+        "Meat & Poultry": "Aisle 3: Meats and Seafood",
+        "Seafood": "Aisle 3: Meats and Seafood",
+        
+        // Aisle 4: Bakery
+        "Bakery": "Aisle 4: Bakery",
+        "Desserts": "Aisle 4: Bakery",
+        
+        // Aisle 5: Frozen Foods
+        "Frozen Foods": "Aisle 5: Frozen Foods",
+        
+        // Aisle 6: Beverages
+        "Water & Sparkling Water": "Aisle 6: Beverages",
+        "Juices & Smoothies": "Aisle 6: Beverages",
+        "Soda & Soft Drinks": "Aisle 6: Beverages",
+        "Alcoholic Beverages": "Aisle 6: Beverages",
+        "Non-Alcoholic Beverages": "Aisle 6: Beverages",
+        "Functional Beverages": "Aisle 6: Beverages",
+        "Drink Mixes & Powders": "Aisle 6: Beverages",
+        
+        // Aisle 7: Snacks
+        "Snacks": "Aisle 7: Snacks",
+        "Candy & Confectionery": "Aisle 7: Snacks",
+        "Chips & Fries": "Aisle 7: Snacks",
+        "Popcorn & Puffed Snacks": "Aisle 7: Snacks",
+        "Granola & Energy Bars": "Aisle 7: Snacks",
+        "Nuts & Seeds": "Aisle 7: Snacks",
+        "Jerky & Dried Meats": "Aisle 7: Snacks",
+        
+        // Aisle 8: Breakfast Foods
+        "Breakfast": "Aisle 8: Breakfast Foods",
+        "Spreads & Syrups": "Aisle 8: Breakfast Foods",
+        
+        // Aisle 9: Baking Supplies
+        "Baking Supplies": "Aisle 9: Baking Supplies",
+        "Cooking Fats & Oils": "Aisle 9: Baking Supplies",
+        "Spices & Seasonings": "Aisle 9: Baking Supplies",
+        
+        // Aisle 10: Canned Goods
+        "Canned & Jarred Goods": "Aisle 10: Canned Goods",
+        "Soups & Broths": "Aisle 10: Canned Goods",
+        "Beans & Legumes": "Aisle 10: Canned Goods",
+        
+        // Aisle 11: Pasta and Rice
+        "Pasta, Rice & Grains": "Aisle 11: Pasta and Rice",
+        "Condiments & Sauces": "Aisle 11: Pasta and Rice",
+        
+        // Aisle 12: International Foods
+        "International Foods": "Aisle 12: International Foods",
+        
+        // Aisle 17: Health and Wellness
+        "Health & Wellness": "Aisle 17: Health and Wellness",
+        "Vitamins & Supplements": "Aisle 17: Health and Wellness",
+        "Pharmacy": "Aisle 17: Health and Wellness",
+        
+        // Aisle 18: Baby Products
+        "Baby Products": "Aisle 18: Baby Products",
+        
+        // Aisle 19: Pet Supplies
+        "Pet Supplies": "Aisle 19: Pet Supplies",
+        
+        // Aisle 20: Household Essentials
+        "Household Cleaning": "Aisle 20: Household Essentials",
+        "Household Appliances": "Aisle 20: Household Essentials",
+        
         // Other
-        "Office Supplies": "Other",
-        "Household Cleaning": "Other",
-        "Household Appliances": "Other",
-        "Furniture": "Other",
-        "Gardening Supplies": "Other",
-        "Baby Products": "Other",
-        "Pet Supplies": "Other",
-        "Sports & Outdoors": "Other"
-        // If any subsections are not mapped, they will default to "Other"
+        "Other": "Aisle 30: Other"
     ]
+    
+    // MARK: - Generic Store Mappings
+    
+    // Use the same mappings for the Generic Store as a fallback
+    static let genericMapping: [String: String] = targetMapping
+    static let genericAisleMapping: [String: String] = targetAisleMapping
 }

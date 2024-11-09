@@ -6,49 +6,68 @@ import Combine
 
 class PathViewModel: ObservableObject {
     // MARK: - Published Properties
-    @Published var path: [MainCategory] = []
-    @Published var currentMainSectionIndex: Int = 0
-    @Published var currentSubSectionIndex: Int = 0
+    @Published var path: [AisleCategory] = []
+    @Published var currentAisleIndex: Int = 0
     @Published var grabbedItems: Set<UUID> = [] {
         didSet {
             checkAndNavigate()
         }
     }
-    
-    // MARK: - Store Layout
+
+    // MARK: - Store Layout and Aisle Mapping
     let storeLayout: [StoreSection]
-    
+    let aisleMapping: [String: String]
+
     // MARK: - Combine Cancellables
     private var cancellables = Set<AnyCancellable>()
-    
+
     // MARK: - Initialization
     init(categorizedItems: [MainCategory], selectedStore: String) {
         self.storeLayout = StoreLayout.layout(for: selectedStore)
-        self.path = PathViewModel.computeOptimalPath(from: categorizedItems, with: storeLayout)
-        
+        self.aisleMapping = CategoryMappings.aisleMappings[selectedStore] ?? CategoryMappings.genericAisleMapping
+
+        // Compute the optimal path
+        self.path = PathViewModel.computeOptimalPath(from: categorizedItems, with: storeLayout, aisleMapping: aisleMapping)
+
         // Observe changes to grabbedItems to automatically navigate
         observeGrabbedItems()
     }
-    
+
     // MARK: - Path Computation
-    static func computeOptimalPath(from categorizedItems: [MainCategory], with storeLayout: [StoreSection]) -> [MainCategory] {
-        // Filter out empty subcategories
-        let filteredMainCategories = categorizedItems.map { mainCategory -> MainCategory in
-            let nonEmptySubcategories = mainCategory.subcategories.filter { !$0.items.isEmpty }
-            return MainCategory(name: mainCategory.name, subcategories: nonEmptySubcategories)
-        }.filter { !$0.subcategories.isEmpty }
-        
-        // Sort main categories based on store layout positions (e.g., left to right, top to bottom)
-        return filteredMainCategories.sorted { main1, main2 in
-            guard let pos1 = storeLayout.first(where: { $0.category == main1.name })?.position,
-                  let pos2 = storeLayout.first(where: { $0.category == main2.name })?.position else {
-                return main1.name < main2.name
+    static func computeOptimalPath(from categorizedItems: [MainCategory], with storeLayout: [StoreSection], aisleMapping: [String: String]) -> [AisleCategory] {
+        // Flatten all items with their corresponding aisles
+        var aisleToItems: [String: [ShoppingItem]] = [:]
+
+        for mainCategory in categorizedItems {
+            for subCategory in mainCategory.subcategories {
+                let aisleName = aisleMapping[subCategory.name] ?? "Aisle 30: Other"
+                aisleToItems[aisleName, default: []].append(contentsOf: subCategory.items)
             }
-            // Example sorting logic: ascending order based on x + y positions
-            return (pos1.x + pos1.y) < (pos2.x + pos2.y)
         }
+
+        // Sort aisles based on store layout positions
+        let sortedAisles = storeLayout
+            .filter { aisleToItems.keys.contains($0.name) }
+            .sorted {
+                ($0.position.x + $0.position.y) < ($1.position.x + $1.position.y)
+            }
+            .map { $0.name }
+
+        // Append any aisles not in the store layout at the end
+        let remainingAisles = aisleToItems.keys.filter { !sortedAisles.contains($0) }.sorted()
+        let allSortedAisles = sortedAisles + remainingAisles
+
+        // Create AisleCategory objects
+        var path: [AisleCategory] = []
+        for aisle in allSortedAisles {
+            if let items = aisleToItems[aisle], !items.isEmpty {
+                path.append(AisleCategory(name: aisle, items: items))
+            }
+        }
+
+        return path
     }
-    
+
     // MARK: - Observation for Automatic Navigation
     private func observeGrabbedItems() {
         // Observe changes to grabbedItems
@@ -58,64 +77,33 @@ class PathViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
-    
+
     // MARK: - Check and Navigate Automatically
     private func checkAndNavigate() {
-        guard currentMainSectionIndex < path.count else { return }
-        
-        let currentMainSection = path[currentMainSectionIndex]
-        
-        guard currentSubSectionIndex < currentMainSection.subcategories.count else { return }
-        
-        let currentSubSection = currentMainSection.subcategories[currentSubSectionIndex]
-        
-        let allItemsGrabbed = currentSubSection.items.allSatisfy { grabbedItems.contains($0.id) }
-        
-        print("Checking navigation: All items in sub-section '\(currentSubSection.name)' grabbed? \(allItemsGrabbed)")
-        
+        guard currentAisleIndex < path.count else { return }
+
+        let currentAisleCategory = path[currentAisleIndex]
+
+        let allItemsGrabbed = currentAisleCategory.items.allSatisfy { grabbedItems.contains($0.id) }
+
         if allItemsGrabbed {
-            moveToNextSubSection()
+            moveToNextAisle()
         }
     }
-    
+
     // MARK: - Navigation Methods
-    func moveToNextSubSection() {
-        guard currentMainSectionIndex < path.count else { return }
-        
-        let currentMainSection = path[currentMainSectionIndex]
-        
-        if currentSubSectionIndex < currentMainSection.subcategories.count - 1 {
-            currentSubSectionIndex += 1
-            print("Moved to next sub-section: \(currentMainSection.subcategories[currentSubSectionIndex].name)")
-        } else {
-            // Move to next main section
-            if currentMainSectionIndex < path.count - 1 {
-                currentMainSectionIndex += 1
-                currentSubSectionIndex = 0
-                print("Moved to next main section: \(path[currentMainSectionIndex].name)")
-            } else {
-                print("All sections completed.")
-            }
+    func moveToNextAisle() {
+        if currentAisleIndex < path.count - 1 {
+            currentAisleIndex += 1
         }
     }
-    
-    func moveToPreviousSubSection() {
-        guard currentMainSectionIndex < path.count else { return }
-        
-        if currentSubSectionIndex > 0 {
-            currentSubSectionIndex -= 1
-            print("Moved to previous sub-section: \(path[currentMainSectionIndex].subcategories[currentSubSectionIndex].name)")
-        } else {
-            // Move to previous main section
-            if currentMainSectionIndex > 0 {
-                currentMainSectionIndex -= 1
-                let previousMainSection = path[currentMainSectionIndex]
-                currentSubSectionIndex = previousMainSection.subcategories.count - 1
-                print("Moved to previous main section: \(path[currentMainSectionIndex].name)")
-            }
+
+    func moveToPreviousAisle() {
+        if currentAisleIndex > 0 {
+            currentAisleIndex -= 1
         }
     }
-    
+
     // MARK: - Item Grabbing Methods
     func toggleItemGrabbed(_ item: ShoppingItem) {
         if grabbedItems.contains(item.id) {
@@ -124,26 +112,28 @@ class PathViewModel: ObservableObject {
             grabbedItems.insert(item.id)
         }
     }
-    
+
     func isItemGrabbed(_ item: ShoppingItem) -> Bool {
         grabbedItems.contains(item.id)
     }
-    
-    // MARK: - Current Main and Sub Section
-    var currentMainSection: MainCategory {
-        path[currentMainSectionIndex]
+
+    // MARK: - Current Aisle
+    var currentAisleCategory: AisleCategory {
+        path[currentAisleIndex]
     }
-    
-    var currentSubSection: SubCategory {
-        currentMainSection.subcategories[currentSubSectionIndex]
+
+    var isFirstAisle: Bool {
+        currentAisleIndex == 0
     }
-    
-    var isFirstSubSection: Bool {
-        currentMainSectionIndex == 0 && currentSubSectionIndex == 0
+
+    var isLastAisle: Bool {
+        currentAisleIndex >= path.count - 1
     }
-    
-    var isLastSubSection: Bool {
-        currentMainSectionIndex >= path.count - 1 &&
-        currentSubSectionIndex >= currentMainSection.subcategories.count - 1
-    }
+}
+
+// MARK: - AisleCategory Struct
+struct AisleCategory: Identifiable, Hashable {
+    let id = UUID()
+    let name: String
+    var items: [ShoppingItem]
 }
