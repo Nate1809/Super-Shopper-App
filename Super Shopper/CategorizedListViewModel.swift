@@ -1,3 +1,5 @@
+// CategorizedListViewModel.swift
+
 import Foundation
 import SwiftUI
 import CoreML
@@ -95,30 +97,16 @@ class CategorizedListViewModel: ObservableObject {
     }
 
     // MARK: - Category Management
-    func categoryActionSheetButtons() -> [ActionSheet.Button] {
-        // Use all possible categories from the mappings
+    /// Returns a list of all main category names.
+    var mainCategoryNames: [String] {
         let mapping = CategoryMappings.mappings[selectedStore] ?? CategoryMappings.genericMapping
+        return Set(mapping.values).sorted()
+    }
 
-        // Build a dictionary of main categories to their subcategories
-        var mainToSubcategories: [String: [String]] = [:]
-
-        for (subCategory, mainCategory) in mapping {
-            mainToSubcategories[mainCategory, default: []].append(subCategory)
-        }
-
-        // Sort main categories and subcategories for consistent order
-        let sortedMainCategories = mainToSubcategories.keys.sorted()
-
-        let buttons: [ActionSheet.Button] = sortedMainCategories.flatMap { mainCategoryName in
-            let subCategories = mainToSubcategories[mainCategoryName]?.sorted() ?? []
-            return subCategories.map { subCategoryName in
-                ActionSheet.Button.default(Text("\(mainCategoryName) / \(subCategoryName)")) { [weak self] in
-                    self?.reassignItem(toMain: mainCategoryName, toSub: subCategoryName)
-                }
-            }
-        } + [.cancel()]
-
-        return buttons
+    /// Returns the subcategories for a given main category.
+    func subcategories(for mainCategory: String) -> [String] {
+        let mapping = CategoryMappings.mappings[selectedStore] ?? CategoryMappings.genericMapping
+        return mapping.filter { $0.value == mainCategory }.map { $0.key }
     }
 
     func reassignItem(toMain main: String, toSub sub: String) {
@@ -164,6 +152,14 @@ class CategorizedListViewModel: ObservableObject {
         if let index = shoppingItems.firstIndex(of: item) {
             shoppingItems.remove(at: index)
             categorizeItems()
+        }
+    }
+
+    // MARK: - Computed Properties
+    /// Returns only the main categories that have items in their subcategories.
+    var nonEmptyCategorizedItems: [MainCategory] {
+        categorizedItems.filter { mainCategory in
+            mainCategory.subcategories.contains(where: { !$0.items.isEmpty })
         }
     }
 }

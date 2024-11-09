@@ -1,3 +1,5 @@
+// CategorizedListView.swift
+
 import SwiftUI
 
 struct CategorizedListView: View {
@@ -27,7 +29,7 @@ struct CategorizedListView: View {
                 .padding(.top, 4)
 
             List {
-                ForEach(viewModel.categorizedItems) { mainCategory in
+                ForEach(viewModel.nonEmptyCategorizedItems) { mainCategory in
                     DisclosureGroup(mainCategory.name) {
                         ForEach(mainCategory.subcategories) { subCategory in
                             if !subCategory.items.isEmpty {
@@ -51,9 +53,6 @@ struct CategorizedListView: View {
                                     }
                                 }
                             }
-                        }
-                        .onDelete { indices in
-                            // Handle deletion if needed for subcategories
                         }
                     }
                 }
@@ -84,12 +83,8 @@ struct CategorizedListView: View {
             // Update the path in pathViewModel when categorizedItems change
             pathViewModel.updatePath(categorizedItems: newCategorizedItems)
         }
-        .actionSheet(isPresented: $viewModel.showCategoryPicker) {
-            ActionSheet(
-                title: Text("Select Category"),
-                message: Text("Assign a category to '\(viewModel.selectedItem?.name ?? "")'"),
-                buttons: viewModel.categoryActionSheetButtons()
-            )
+        .sheet(isPresented: $viewModel.showCategoryPicker) {
+            CategoryPickerView(viewModel: viewModel)
         }
     }
 
