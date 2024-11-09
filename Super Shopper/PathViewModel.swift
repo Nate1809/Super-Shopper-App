@@ -99,10 +99,10 @@ class PathViewModel: ObservableObject {
         if grabbedItems.count == totalItems && totalItems > 0 {
             allItemsGrabbed = true
 
-            // Optional: Automatically reset after 3 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                self.allItemsGrabbed = false
-            }
+//            // Optional: Automatically reset after 3 seconds
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+//                self.allItemsGrabbed = false
+//            }
         } else {
             allItemsGrabbed = false
         }
