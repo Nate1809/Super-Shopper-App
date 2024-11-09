@@ -109,6 +109,7 @@ class PathViewModel: ObservableObject {
     /// Checks if all items across all aisles have been grabbed.
     private func checkIfAllItemsGrabbed() {
         let totalItems = path.flatMap { $0.items }.count
+
         if grabbedItems.count == totalItems && totalItems > 0 {
             allItemsGrabbed = true
         } else {
@@ -152,7 +153,11 @@ class PathViewModel: ObservableObject {
     // MARK: - Current Aisle
     /// The currently active aisle category.
     var currentAisleCategory: AisleCategory {
-        path[currentAisleIndex]
+        if currentAisleIndex < path.count {
+            return path[currentAisleIndex]
+        } else {
+            return AisleCategory(name: "Unknown Aisle", items: [])
+        }
     }
 
     /// Indicates whether the current aisle is the first in the path.
@@ -172,7 +177,7 @@ class PathViewModel: ObservableObject {
     func updatePath(categorizedItems: [MainCategory]) {
         // Recompute the path based on new categorizedItems
         self.path = PathViewModel.computeOptimalPath(from: categorizedItems, with: storeLayout, aisleMapping: aisleMapping)
-        
+
         // Reset navigation state
         self.currentAisleIndex = 0
         self.grabbedItems = []

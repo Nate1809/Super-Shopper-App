@@ -1,3 +1,5 @@
+// PathView.swift
+
 import SwiftUI
 import ConfettiSwiftUI
 
@@ -27,6 +29,7 @@ struct PathView: View {
                                 )
                             }
                         }
+                        .padding(.horizontal) // Add padding here
                         .onChange(of: viewModel.currentAisleIndex) { newAisleIndex in
                             if newAisleIndex < viewModel.path.count {
                                 let aisle = viewModel.path[newAisleIndex]
@@ -149,8 +152,7 @@ struct AisleSectionView: View {
             .cornerRadius(10)
         }
         .padding(.horizontal)
-        .padding(.top, isCurrentAisle ? 10 : 0)
-        .padding(.bottom, isCurrentAisle ? 10 : 0)
+        .padding(.vertical, isCurrentAisle ? 10 : 5)
         .background {
             if isCurrentAisle {
                 LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.8), Color.blue]),
@@ -161,6 +163,7 @@ struct AisleSectionView: View {
                 Color.clear
             }
         }
+        .padding(.horizontal) // Add horizontal padding here
         .animation(.easeInOut(duration: 0.3), value: isCurrentAisle)
     }
 }
