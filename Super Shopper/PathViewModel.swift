@@ -11,8 +11,10 @@ class PathViewModel: ObservableObject {
     @Published var grabbedItems: Set<UUID> = [] {
         didSet {
             checkAndNavigate()
+            checkIfAllItemsGrabbed()
         }
     }
+    @Published var allItemsGrabbed: Bool = false // New property
 
     // MARK: - Store Layout and Aisle Mapping
     let storeLayout: [StoreSection]
@@ -84,10 +86,25 @@ class PathViewModel: ObservableObject {
 
         let currentAisleCategory = path[currentAisleIndex]
 
-        let allItemsGrabbed = currentAisleCategory.items.allSatisfy { grabbedItems.contains($0.id) }
+        let allItemsGrabbedInCurrentAisle = currentAisleCategory.items.allSatisfy { grabbedItems.contains($0.id) }
 
-        if allItemsGrabbed {
+        if allItemsGrabbedInCurrentAisle {
             moveToNextAisle()
+        }
+    }
+
+    // MARK: - Check if All Items are Grabbed
+    private func checkIfAllItemsGrabbed() {
+        let totalItems = path.flatMap { $0.items }.count
+        if grabbedItems.count == totalItems && totalItems > 0 {
+            allItemsGrabbed = true
+
+            // Optional: Automatically reset after 3 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                self.allItemsGrabbed = false
+            }
+        } else {
+            allItemsGrabbed = false
         }
     }
 

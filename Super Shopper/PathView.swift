@@ -1,93 +1,112 @@
 // PathView.swift
 
 import SwiftUI
+import ConfettiSwiftUI // Import the ConfettiSwiftUI package
 
 struct PathView: View {
     @ObservedObject var viewModel: PathViewModel
     @State private var scrollToAisle: UUID? = nil
+    @State private var confettiCounter: Int = 0 // State variable for confetti
 
     init(categorizedItems: [MainCategory], selectedStore: String) {
         self.viewModel = PathViewModel(categorizedItems: categorizedItems, selectedStore: selectedStore)
     }
 
     var body: some View {
-        VStack {
-            // Instructional Text
-            Text("Tap the circle to check off items.")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-                .padding(.horizontal)
-                .padding(.top, 4)
+        ZStack {
+            VStack {
+                // Instructional Text
+                Text("Tap the circle to check off items.")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
+                    .padding(.top, 4)
 
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 20) {
-                        ForEach(Array(viewModel.path.enumerated()), id: \.1.id) { index, aisleCategory in
-                            AisleSectionView(
-                                aisleCategory: aisleCategory,
-                                isCurrentAisle: viewModel.currentAisleIndex == index,
-                                viewModel: viewModel
-                            )
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 20) {
+                            ForEach(Array(viewModel.path.enumerated()), id: \.1.id) { index, aisleCategory in
+                                AisleSectionView(
+                                    aisleCategory: aisleCategory,
+                                    isCurrentAisle: viewModel.currentAisleIndex == index,
+                                    viewModel: viewModel
+                                )
+                            }
                         }
-                    }
-                    .onChange(of: viewModel.currentAisleIndex) { newAisleIndex in
-                        if newAisleIndex < viewModel.path.count {
-                            let aisle = viewModel.path[newAisleIndex]
-                            withAnimation {
-                                proxy.scrollTo(aisle.id, anchor: .top)
+                        .onChange(of: viewModel.currentAisleIndex) { newAisleIndex in
+                            if newAisleIndex < viewModel.path.count {
+                                let aisle = viewModel.path[newAisleIndex]
+                                withAnimation {
+                                    proxy.scrollTo(aisle.id, anchor: .top)
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Navigation Buttons
-            HStack {
-                Button(action: {
-                    withAnimation {
-                        viewModel.moveToPreviousAisle()
-                        triggerHaptic()
+                // Navigation Buttons
+                HStack {
+                    Button(action: {
+                        withAnimation {
+                            viewModel.moveToPreviousAisle()
+                            triggerHaptic()
+                        }
+                    }) {
+                        Text("Previous Aisle")
+                            .font(.headline)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(viewModel.isFirstAisle ? Color.gray : Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
-                }) {
-                    Text("Previous Aisle")
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(viewModel.isFirstAisle ? Color.gray : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                .disabled(viewModel.isFirstAisle)
-                .accessibilityLabel("Move to previous aisle")
+                    .disabled(viewModel.isFirstAisle)
+                    .accessibilityLabel("Move to previous aisle")
 
-                Button(action: {
-                    withAnimation {
-                        viewModel.moveToNextAisle()
-                        triggerHaptic()
+                    Button(action: {
+                        withAnimation {
+                            viewModel.moveToNextAisle()
+                            triggerHaptic()
+                        }
+                    }) {
+                        Text("Next Aisle")
+                            .font(.headline)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(viewModel.isLastAisle ? Color.gray : Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
-                }) {
-                    Text("Next Aisle")
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(viewModel.isLastAisle ? Color.gray : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                    .disabled(viewModel.isLastAisle)
+                    .accessibilityLabel("Move to next aisle")
                 }
-                .disabled(viewModel.isLastAisle)
-                .accessibilityLabel("Move to next aisle")
+                .padding()
             }
-            .padding()
+            .navigationTitle("Optimal Path")
+            .padding(.bottom)
+
+            // Confetti View
+            if viewModel.allItemsGrabbed {
+                ConfettiCannon(counter: $confettiCounter, num: 100, rainHeight: 800.0, radius: 350.0)
+                    .onAppear {
+                        confettiCounter += 1
+                        triggerSuccessHaptic()
+                    }
+            }
         }
-        .navigationTitle("Optimal Path")
-        .padding(.bottom)
     }
 
-    // Haptic Feedback Function
+    // MARK: - Haptic Feedback Functions
+
     func triggerHaptic() {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
         generator.impactOccurred()
+    }
+
+    func triggerSuccessHaptic() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
     }
 }
 

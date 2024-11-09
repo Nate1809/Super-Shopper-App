@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		26752EB82CDF3EE80084406F /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 26752EB72CDF3EE80084406F /* ConfettiSwiftUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		268D0B542CCC3ED200F40674 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26752EB82CDF3EE80084406F /* ConfettiSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = "Super Shopper";
 			packageProductDependencies = (
+				26752EB72CDF3EE80084406F /* ConfettiSwiftUI */,
 			);
 			productName = "Super Shopper";
 			productReference = 268D0B432CCC3ED100F40674 /* Super Shopper.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 268D0B3A2CCC3ED100F40674;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				26752EB62CDF3EE80084406F /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 268D0B442CCC3ED100F40674 /* Products */;
 			projectDirPath = "";
@@ -554,6 +563,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		26752EB62CDF3EE80084406F /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/simibac/ConfettiSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		26752EB72CDF3EE80084406F /* ConfettiSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 26752EB62CDF3EE80084406F /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */;
+			productName = ConfettiSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 268D0B3B2CCC3ED100F40674 /* Project object */;
 }
