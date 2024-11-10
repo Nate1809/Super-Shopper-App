@@ -27,7 +27,7 @@ struct SubcategoryPickerView: View {
                         if !isScrolling {
                             viewModel.reassignItem(toMain: mainCategory, toSub: subCategory)
                             presentationMode.wrappedValue.dismiss() // Dismiss SubcategoryPickerView
-                            presentationMode.wrappedValue.dismiss() // Dismiss CategoryPickerView
+                            // No need to dismiss CategoryPickerView as it's handled by NavigationLink
                         }
                     }) {
                         VStack {
@@ -61,7 +61,20 @@ struct SubcategoryPickerView: View {
             )
         }
         .navigationTitle(mainCategory)
-        // Removed the toolbar with the "Back" button to prevent duplicate back buttons
+        .navigationBarBackButtonHidden(true) // Hide the default back button
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: {
+                    presentationMode.wrappedValue.dismiss() // Dismiss SubcategoryPickerView
+                }) {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                }
+                .accessibilityLabel("Back") // Improve accessibility
+            }
+        }
     }
 }
 
