@@ -5,7 +5,7 @@ import SwiftUI
 struct CategorizedListView: View {
     @ObservedObject var viewModel: CategorizedListViewModel
     @StateObject var pathViewModel: PathViewModel
-
+    
     init(shoppingItems: [ShoppingItem], selectedStore: String) {
         // Initialize viewModel first
         let vm = CategorizedListViewModel(shoppingItems: shoppingItems, selectedStore: selectedStore)
@@ -18,7 +18,7 @@ struct CategorizedListView: View {
             selectedStore: selectedStore
         ))
     }
-
+    
     var body: some View {
         VStack(alignment: .leading) {
             // Instructional Text
@@ -27,14 +27,14 @@ struct CategorizedListView: View {
                 .foregroundColor(.gray)
                 .padding(.horizontal)
                 .padding(.top, 4)
-
+            
             List {
                 ForEach(viewModel.nonEmptyCategorizedItems) { mainCategory in
-                    DisclosureGroup(mainCategory.name) {
+                    DisclosureGroup("\(viewModel.emojiForMainCategory(mainCategory.name)) \(mainCategory.name)") {
                         ForEach(mainCategory.subcategories) { subCategory in
                             if !subCategory.items.isEmpty {
                                 VStack(alignment: .leading) {
-                                    Text(subCategory.name)
+                                    Text("\(viewModel.emojiForSubCategory(subCategory.name)) \(subCategory.name)")
                                         .font(.headline)
                                         .padding(.vertical, 2)
                                     ForEach(subCategory.items) { item in
@@ -58,7 +58,7 @@ struct CategorizedListView: View {
                 }
             }
             .listStyle(PlainListStyle())
-
+            
             NavigationLink(destination: PathView(
                 viewModel: pathViewModel // Pass the existing pathViewModel
             )) {
@@ -87,11 +87,11 @@ struct CategorizedListView: View {
             CategoryPickerView(viewModel: viewModel)
         }
     }
-
+    
     var showOptimalPathButtonLabel: String {
         viewModel.shoppingItems.isEmpty ? "No Items to Show Path" : "Show Optimal Path"
     }
-
+    
     struct PressableButtonStyle: ButtonStyle {
         func makeBody(configuration: Configuration) -> some View {
             configuration.label

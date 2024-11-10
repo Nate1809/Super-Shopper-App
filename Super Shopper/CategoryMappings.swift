@@ -185,4 +185,84 @@ struct CategoryMappings {
     // Use the same mappings for the Generic Store as a fallback
     static let genericMapping: [String: String] = targetMapping
     static let genericAisleMapping: [String: String] = targetAisleMapping
+    
+    // MARK: - Emojis for Main Categories
+    static let mainCategoryEmojis: [String: String] = [
+        "Grocery": "🛒",
+        "Personal Care": "🧴",
+        "Health or Pharmacy": "💊",
+        "Household Essentials": "🏠",
+        "Furniture": "🛋️",
+        "School & Office Supplies": "✏️",
+        "Outdoor Living & Garden": "🌳",
+        "Baby": "👶",
+        "Pets": "🐶",
+        "Sports & Outdoors": "⚽️",
+        "Other": "🔖"
+    ]
+    
+    // MARK: - Emojis for Subcategories
+    static let subcategoryEmojis: [String: String] = [
+        // Grocery
+        "Candy & Confectionery": "🍬",
+        "Dairy": "🥛",
+        "Snacks": "🍿",
+        "Produce": "🍎",
+        "Water & Sparkling Water": "💧",
+        "Bakery": "🥖",
+        "Frozen Foods": "🧊",
+        "Meat & Poultry": "🍗",
+        "Spices & Seasonings": "🧂",
+        "Coffee & Tea": "☕️",
+        "Condiments & Sauces": "🍯",
+        "International Foods": "🍱",
+        "Baking Supplies": "🥧",
+        "Seafood": "🐟",
+        "Pasta, Rice & Grains": "🍚",
+        "Canned & Jarred Goods": "🥫",
+        "Cooking Fats & Oils": "🧈",
+        "Non-Alcoholic Beverages": "🧃",
+        "Breakfast": "🥞",
+        "Soda & Soft Drinks": "🥤",
+        "Desserts": "🍰",
+        "Spreads & Syrups": "🍯",
+        "Alcoholic Beverages": "🍺",
+        "Chips & Fries": "🍟",
+        "Soups & Broths": "🥣",
+        "Juices & Smoothies": "🍹",
+        "Drink Mixes & Powders": "🧋",
+        "Prepared Foods": "🍱",
+        "Jerky & Dried Meats": "🥓",
+        "Beans & Legumes": "🌮",
+        "Functional Beverages": "🧃",
+        "Popcorn & Puffed Snacks": "🍿",
+        "Granola & Energy Bars": "🍫",
+        "Nuts & Seeds": "🥜",
+        
+        // Personal Care
+        "Protein & Meal Replacements": "🥤",
+        "Health & Wellness": "💊",
+        "Pharmacy": "💊",
+        "Vitamins & Supplements": "💊",
+        "Bath & Body": "🛀",
+        
+        // Household Essentials
+        "Household Cleaning": "🧹",
+        "Household Appliances": "🔌",
+        "Furniture": "🛋️",
+        "Office Supplies": "✏️",
+        "Gardening Supplies": "🌱",
+        
+        // Baby
+        "Baby Products": "🍼",
+        
+        // Pets
+        "Pet Supplies": "🐶",
+        
+        // Sports & Outdoors
+        "Sports & Outdoors": "⚽️",
+        
+        // Other
+        "Other": "🔖"
+    ]
 }

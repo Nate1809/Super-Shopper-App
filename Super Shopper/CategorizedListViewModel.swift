@@ -13,37 +13,40 @@ class CategorizedListViewModel: ObservableObject {
     @Published var showCategoryPicker: Bool = false
     @Published var selectedItem: ShoppingItem? = nil
     @Published var mainCategoriesList: [MainCategory] = []
-
+    
+    // New Published Property for Category Picker
+    @Published var selectedMainCategory: String? = nil
+    
     // MARK: - ML Model
     private let productClassifier = ProductCategoryClassifier()
-
+    
     // MARK: - Initializer
     init(shoppingItems: [ShoppingItem], selectedStore: String) {
         self.shoppingItems = shoppingItems
         self.selectedStore = selectedStore
         categorizeItems()
     }
-
+    
     // MARK: - Categorization Logic
     func categorizeItems() {
         // Get the mapping for the selected store
         let mapping = CategoryMappings.mappings[selectedStore] ?? CategoryMappings.genericMapping
-
+        
         // Initialize main categories
         var tempCategorizedItems: [MainCategory] = []
-
+        
         // Get unique main categories from the mapping
         let mainCategoriesSet = Set(mapping.values)
         for mainCategoryName in mainCategoriesSet {
             tempCategorizedItems.append(MainCategory(name: mainCategoryName, subcategories: []))
         }
-
+        
         // Assign items to categories
         for item in shoppingItems {
             // Check if the user has assigned categories
             let mainCategoryName: String
             let subCategoryName: String
-
+            
             if let userMainCategory = item.userAssignedMainCategory,
                let userSubCategory = item.userAssignedSubCategory {
                 // Use user-assigned categories
@@ -58,7 +61,7 @@ class CategorizedListViewModel: ObservableObject {
                 subCategoryName = predictedSubCategory
                 mainCategoryName = mapping[predictedSubCategory] ?? "Other"
             }
-
+            
             // Find or create the main category
             if let mainIndex = tempCategorizedItems.firstIndex(where: { $0.name == mainCategoryName }) {
                 // Main category exists
@@ -80,11 +83,11 @@ class CategorizedListViewModel: ObservableObject {
                 tempCategorizedItems.append(newMainCategory)
             }
         }
-
+        
         // Update the published property
         self.categorizedItems = tempCategorizedItems
     }
-
+    
     // MARK: - Prediction Function
     private func predictCategory(for preprocessedName: String) -> String {
         do {
@@ -95,23 +98,35 @@ class CategorizedListViewModel: ObservableObject {
             return "Other" // Default subcategory in case of an error
         }
     }
-
+    
     // MARK: - Category Management
     /// Returns a list of all main category names.
     var mainCategoryNames: [String] {
         let mapping = CategoryMappings.mappings[selectedStore] ?? CategoryMappings.genericMapping
-        return Set(mapping.values).sorted()
+        let mainCategories = Set(mapping.values)
+        return mainCategories.sorted()
     }
-
+    
     /// Returns the subcategories for a given main category.
     func subcategories(for mainCategory: String) -> [String] {
         let mapping = CategoryMappings.mappings[selectedStore] ?? CategoryMappings.genericMapping
-        return mapping.filter { $0.value == mainCategory }.map { $0.key }
+        let subcategories = mapping.filter { $0.value == mainCategory }.map { $0.key }
+        return subcategories.sorted()
     }
-
+    
+    /// Returns the emoji for a given main category.
+    func emojiForMainCategory(_ mainCategory: String) -> String {
+        return CategoryMappings.mainCategoryEmojis[mainCategory] ?? ""
+    }
+    
+    /// Returns the emoji for a given subcategory.
+    func emojiForSubCategory(_ subCategory: String) -> String {
+        return CategoryMappings.subcategoryEmojis[subCategory] ?? ""
+    }
+    
     func reassignItem(toMain main: String, toSub sub: String) {
         guard let item = selectedItem else { return }
-
+        
         // Remove item from its current category
         for mainIndex in categorizedItems.indices {
             for subIndex in categorizedItems[mainIndex].subcategories.indices {
@@ -121,11 +136,11 @@ class CategorizedListViewModel: ObservableObject {
                 }
             }
         }
-
+        
         // Save the user-assigned categories to the item
         item.userAssignedMainCategory = main
         item.userAssignedSubCategory = sub
-
+        
         // Add the item to the new category
         if let mainIndex = categorizedItems.firstIndex(where: { $0.name == main }) {
             if let subIndex = categorizedItems[mainIndex].subcategories.firstIndex(where: { $0.name == sub }) {
@@ -141,12 +156,13 @@ class CategorizedListViewModel: ObservableObject {
             let newMainCategory = MainCategory(name: main, subcategories: [newSubCategory])
             categorizedItems.append(newMainCategory)
         }
-
+        
         // Reset selection
         selectedItem = nil
         showCategoryPicker = false
+        selectedMainCategory = nil
     }
-
+    
     // MARK: - Deletion Functionality
     func deleteItem(_ item: ShoppingItem) {
         if let index = shoppingItems.firstIndex(of: item) {
@@ -154,7 +170,7 @@ class CategorizedListViewModel: ObservableObject {
             categorizeItems()
         }
     }
-
+    
     // MARK: - Computed Properties
     /// Returns only the main categories that have items in their subcategories.
     var nonEmptyCategorizedItems: [MainCategory] {
