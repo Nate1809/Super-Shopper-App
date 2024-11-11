@@ -11,7 +11,7 @@ import SwiftUI
 struct Super_ShopperApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainMenuView() // Set the main menu as the initial view
         }
     }
 }
