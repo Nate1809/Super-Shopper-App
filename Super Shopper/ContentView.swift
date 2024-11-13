@@ -195,33 +195,35 @@ struct ContentView: View {
     }
 }
 
-//// Extension to access items as a sorted array
-//extension CDShoppingList {
-//    var itemsArray: [CDShoppingItem] {
-//        let set = items as? Set<CDShoppingItem> ?? []
-//        return set.sorted { ($0.name ?? "") < ($1.name ?? "") }
-//    }
+
+
+//struct ContentView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let context = PersistenceController.preview.container.viewContext
 //
-//    /// Adds a new item to the shopping list
-//    /// - Parameters:
-//    ///   - name: Name of the item
-//    ///   - quantity: Quantity of the item
-//    ///   - context: Managed object context
-//    func addItem(name: String, quantity: Int16, context: NSManagedObjectContext) {
-//        let newItem = CDShoppingItem(context: context)
-//        newItem.id = UUID()
-//        newItem.name = name
-//        newItem.quantity = quantity
-//        newItem.isCompleted = false
-//        newItem.list = self
-//    }
+//        // Create sample ShoppingList and ShoppingItems
+//        let sampleList = CDShoppingList(context: context)
+//        sampleList.id = UUID()
+//        sampleList.name = "Sample List"
+//        sampleList.dateCreated = Date()
 //
-//    /// Deletes an item from the shopping list
-//    /// - Parameters:
-//    ///   - item: The item to delete
-//    ///   - context: Managed object context
-//    func removeItem(_ item: CDShoppingItem, context: NSManagedObjectContext) {
-//        self.removeFromItems(item)
-//        context.delete(item)
+//        let item1 = CDShoppingItem(context: context)
+//        item1.id = UUID()
+//        item1.name = "Milk"
+//        item1.quantity = 2
+//        item1.isCompleted = false
+//        item1.dateAdded = Date()
+//        item1.list = sampleList
+//
+//        let item2 = CDShoppingItem(context: context)
+//        item2.id = UUID()
+//        item2.name = "Bread"
+//        item2.quantity = 1
+//        item2.isCompleted = false
+//        item2.dateAdded = Date().addingTimeInterval(60) // Added 1 minute later
+//        item2.list = sampleList
+//
+//        return ContentView()
+//            .environment(\.managedObjectContext, context)
 //    }
 //}

@@ -17,10 +17,12 @@ public class CDShoppingList: NSManagedObject {
 // CDShoppingList+Extensions.swift
 
 extension CDShoppingList {
-    /// Computed property to get items as a sorted array
     var itemsArray: [CDShoppingItem] {
         let set = items as? Set<CDShoppingItem> ?? []
-        return set.sorted { ($0.name ?? "") < ($1.name ?? "") }
+        // Sort by dateAdded ascending to maintain insertion order
+        return set.sorted {
+            ($0.dateAdded ?? Date.distantPast) < ($1.dateAdded ?? Date.distantPast)
+        }
     }
 
     /// Adds a new item to the shopping list
@@ -34,11 +36,14 @@ extension CDShoppingList {
         newItem.name = name
         newItem.quantity = quantity
         newItem.isCompleted = false
+        newItem.dateAdded = Date() // Set the dateAdded to current date
         newItem.list = self
     }
 
     /// Deletes an item from the shopping list
-    /// - Parameter item: The item to delete
+    /// - Parameters:
+    ///   - item: The item to delete
+    ///   - context: Managed object context
     func removeItem(_ item: CDShoppingItem, context: NSManagedObjectContext) {
         self.removeFromItems(item)
         context.delete(item)

@@ -13,7 +13,7 @@ struct PersistenceController {
     // Initializer for PersistenceController
     init(inMemory: Bool = false) {
         // Initialize the container with the name matching your .xcdatamodeld file
-        container = NSPersistentContainer(name: "SuperShopperModel") // Replace with your actual model name if different
+        container = NSPersistentContainer(name: "SuperShopperModel") // Ensure this matches your .xcdatamodeld file name
 
         // If inMemory is true, configure the container for in-memory storage (useful for previews/testing)
         if inMemory {
@@ -52,6 +52,7 @@ struct PersistenceController {
                 newItem.name = "Sample Item \(j + 1)"
                 newItem.quantity = Int16(j + 1)
                 newItem.isCompleted = false
+                newItem.dateAdded = Date().addingTimeInterval(Double(j * 60)) // Staggered dates
                 newItem.list = newList
             }
         }
