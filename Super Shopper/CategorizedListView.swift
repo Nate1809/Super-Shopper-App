@@ -1,24 +1,25 @@
 // CategorizedListView.swift
 
 import SwiftUI
+import CoreData
 
 struct CategorizedListView: View {
     @ObservedObject var viewModel: CategorizedListViewModel
     @StateObject var pathViewModel: PathViewModel
-    
-    init(shoppingItems: [ShoppingItem], selectedStore: String) {
-        // Initialize viewModel first
-        let vm = CategorizedListViewModel(shoppingItems: shoppingItems, selectedStore: selectedStore)
-        vm.categorizeItems() // Ensure categorizedItems is populated
+    @Environment(\.managedObjectContext) private var viewContext
+
+    init(shoppingItems: [CDShoppingItem], selectedStore: String, context: NSManagedObjectContext) {
+        let vm = CategorizedListViewModel(shoppingItems: shoppingItems, selectedStore: selectedStore, context: context)
+        vm.categorizeItems()
         self._viewModel = ObservedObject(wrappedValue: vm)
-        
-        // Now initialize pathViewModel using the populated categorizedItems
+
         self._pathViewModel = StateObject(wrappedValue: PathViewModel(
             categorizedItems: vm.categorizedItems,
-            selectedStore: selectedStore
+            selectedStore: selectedStore,
+            context: context
         ))
     }
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             // Instructional Text
@@ -27,7 +28,7 @@ struct CategorizedListView: View {
                 .foregroundColor(.gray)
                 .padding(.horizontal)
                 .padding(.top, 4)
-            
+
             List {
                 ForEach(viewModel.nonEmptyCategorizedItems) { mainCategory in
                     DisclosureGroup("\(viewModel.emojiForMainCategory(mainCategory.name)) \(mainCategory.name)") {
@@ -58,7 +59,7 @@ struct CategorizedListView: View {
                 }
             }
             .listStyle(PlainListStyle())
-            
+
             NavigationLink(destination: PathView(
                 viewModel: pathViewModel // Pass the existing pathViewModel
             )) {
@@ -87,11 +88,11 @@ struct CategorizedListView: View {
             CategoryPickerView(viewModel: viewModel)
         }
     }
-    
+
     var showOptimalPathButtonLabel: String {
         viewModel.shoppingItems.isEmpty ? "No Items to Show Path" : "Show Optimal Path"
     }
-    
+
     struct PressableButtonStyle: ButtonStyle {
         func makeBody(configuration: Configuration) -> some View {
             configuration.label
@@ -101,11 +102,4 @@ struct CategorizedListView: View {
     }
 }
 
-#Preview {
-    let sampleItems = [
-        ShoppingItem(name: "Milk", quantity: 2),
-        ShoppingItem(name: "Flour", quantity: 1),
-        ShoppingItem(name: "Shampoo", quantity: 1)
-    ]
-    CategorizedListView(shoppingItems: sampleItems, selectedStore: "Target")
-}
+

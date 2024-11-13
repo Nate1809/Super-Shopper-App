@@ -11,9 +11,9 @@ struct MainCategory: Identifiable, Hashable {
 struct SubCategory: Identifiable, Hashable {
     let id = UUID()
     let name: String
-    var items: [ShoppingItem]
-    
-    init(name: String, items: [ShoppingItem] = []) {
+    var items: [CDShoppingItem] // Updated to use CDShoppingItem
+
+    init(name: String, items: [CDShoppingItem] = []) { // Updated initializer
         self.name = name
         self.items = items
     }

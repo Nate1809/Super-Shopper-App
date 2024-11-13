@@ -5,7 +5,6 @@ import ConfettiSwiftUI
 
 struct PathView: View {
     @ObservedObject var viewModel: PathViewModel // Receive the PathViewModel as a parameter
-    @State private var scrollToAisle: UUID? = nil
     @State private var confettiCounter: Int = 0
 
     var body: some View {
@@ -107,6 +106,8 @@ struct PathView: View {
     }
 }
 
+
+
 // MARK: - AisleSectionView
 
 struct AisleSectionView: View {
@@ -171,13 +172,13 @@ struct AisleSectionView: View {
 // MARK: - ItemRowView
 
 struct ItemRowView: View {
-    let item: ShoppingItem
+    let item: CDShoppingItem
     let isCurrentAisle: Bool
     @ObservedObject var viewModel: PathViewModel
 
     var body: some View {
         HStack {
-            Text(item.name)
+            Text(item.wrappedName)
                 .strikethrough(viewModel.isItemGrabbed(item), color: strikethroughColor)
                 .foregroundColor(textColor)
             Spacer()
@@ -193,7 +194,7 @@ struct ItemRowView: View {
                     .foregroundColor(viewModel.isItemGrabbed(item) ? .green : isCurrentAisle ? .white : .gray)
             }
             .buttonStyle(BorderlessButtonStyle())
-            .accessibilityLabel(viewModel.isItemGrabbed(item) ? "Uncheck \(item.name)" : "Check \(item.name)")
+            .accessibilityLabel(viewModel.isItemGrabbed(item) ? "Uncheck \(item.wrappedName)" : "Check \(item.wrappedName)")
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
@@ -235,33 +236,30 @@ struct ItemRowView: View {
     }
 }
 
-#Preview {
-    let sampleItems1 = [
-        ShoppingItem(name: "Apple", quantity: 2),
-        ShoppingItem(name: "Banana", quantity: 3)
-    ]
-    let sampleItems2 = [
-        ShoppingItem(name: "Milk", quantity: 1),
-        ShoppingItem(name: "Cheese", quantity: 2)
-    ]
-    let sampleItems3 = [
-        ShoppingItem(name: "Shampoo", quantity: 1),
-        ShoppingItem(name: "Conditioner", quantity: 1)
-    ]
-    let sampleMainCategories = [
-        MainCategory(name: "Produce", subcategories: [
-            SubCategory(name: "Produce", items: sampleItems1)
-        ]),
-        MainCategory(name: "Dairy", subcategories: [
-            SubCategory(name: "Dairy", items: sampleItems2)
-        ]),
-        MainCategory(name: "Personal Care", subcategories: [
-            SubCategory(name: "Bath & Body", items: sampleItems3)
+struct PathView_Previews: PreviewProvider {
+    static var previews: some View {
+        let context = PersistenceController.preview.container.viewContext
+
+        // Create sample ShoppingItems
+        let item1 = CDShoppingItem(context: context)
+        item1.id = UUID()
+        item1.name = "Apple"
+        item1.quantity = 2
+        item1.isCompleted = false
+
+        let item2 = CDShoppingItem(context: context)
+        item2.id = UUID()
+        item2.name = "Banana"
+        item2.quantity = 3
+        item2.isCompleted = false
+
+        let mainCategory = MainCategory(name: "Produce", subcategories: [
+            SubCategory(name: "Fruits", items: [item1, item2])
         ])
-    ]
 
-    // Initialize PathViewModel
-    let pathViewModel = PathViewModel(categorizedItems: sampleMainCategories, selectedStore: "Target")
+        let pathViewModel = PathViewModel(categorizedItems: [mainCategory], selectedStore: "Target", context: context)
 
-    return PathView(viewModel: pathViewModel)
+        return PathView(viewModel: pathViewModel)
+            .environment(\.managedObjectContext, context)
+    }
 }

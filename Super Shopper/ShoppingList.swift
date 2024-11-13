@@ -4,12 +4,12 @@ import Foundation
 import Combine
 
 class ShoppingList: ObservableObject {
-    @Published var items: [ShoppingItem] = []
+    @Published var items: [CDShoppingItem] = []
     
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        // Observe changes to each ShoppingItem in the items array
+        // Observe changes to each CDShoppingItem in the items array
         $items
             .sink { [weak self] items in
                 for item in items {

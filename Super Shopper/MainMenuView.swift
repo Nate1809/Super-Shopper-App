@@ -1,10 +1,4 @@
-//
-//  MainMenuView.swift
-//  Super Shopper
-//
-//  Created by Nathan Guzman on 11/11/24.
-//
-
+// MainMenuView.swift
 
 import SwiftUI
 
@@ -15,7 +9,7 @@ struct MainMenuView: View {
                 Text("Super Shopper")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                
+
                 NavigationLink(destination: ContentView()) {
                     VStack {
                         Image(systemName: "plus.circle.fill")
@@ -30,7 +24,7 @@ struct MainMenuView: View {
                     .cornerRadius(10)
                     .shadow(radius: 5)
                 }
-                
+
                 HStack(spacing: 40) {
                     NavigationLink(destination: ViewListsView()) {
                         VStack {
@@ -45,7 +39,7 @@ struct MainMenuView: View {
                         .cornerRadius(10)
                         .shadow(radius: 5)
                     }
-                    
+
                     NavigationLink(destination: SettingsView()) {
                         VStack {
                             Image(systemName: "gearshape.fill")
@@ -68,6 +62,8 @@ struct MainMenuView: View {
     }
 }
 
-#Preview {
-    MainMenuView()
+struct MainMenuView_Previews: PreviewProvider {
+    static var previews: some View {
+        MainMenuView()
+    }
 }

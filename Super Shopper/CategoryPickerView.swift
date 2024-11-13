@@ -68,14 +68,14 @@ struct CategoryPickerView: View {
     }
 }
 
-struct CategoryPickerView_Previews: PreviewProvider {
-    static var previews: some View {
-        let sampleItems = [
-            ShoppingItem(name: "Milk", quantity: 2),
-            ShoppingItem(name: "Flour", quantity: 1),
-            ShoppingItem(name: "Shampoo", quantity: 1)
-        ]
-        let viewModel = CategorizedListViewModel(shoppingItems: sampleItems, selectedStore: "Target")
-        CategoryPickerView(viewModel: viewModel)
-    }
-}
+//struct CategoryPickerView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let sampleItems = [
+//            CDShoppingItem(name: "Milk", quantity: 2),
+//            CDShoppingItem(name: "Flour", quantity: 1),
+//            CDShoppingItem(name: "Shampoo", quantity: 1)
+//        ]
+//        let viewModel = CategorizedListViewModel(shoppingItems: sampleItems, selectedStore: "Target")
+//        CategoryPickerView(viewModel: viewModel)
+//    }
+//}

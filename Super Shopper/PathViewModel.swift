@@ -3,6 +3,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import CoreData
 
 class PathViewModel: ObservableObject {
     // MARK: - Published Properties
@@ -18,7 +19,10 @@ class PathViewModel: ObservableObject {
 
     // MARK: - Store Layout and Aisle Mapping
     private var storeLayout: [StoreSection] = []
-    private var aisleMapping: [String: String] = [:]
+    private var aisleMapping: [String: String] = [:] // Corrected Initialization
+
+    // MARK: - Core Data Context
+    private var viewContext: NSManagedObjectContext
 
     // MARK: - Combine Cancellables
     private var cancellables = Set<AnyCancellable>()
@@ -28,7 +32,9 @@ class PathViewModel: ObservableObject {
     /// - Parameters:
     ///   - categorizedItems: The list of categorized shopping items.
     ///   - selectedStore: The name of the selected store.
-    init(categorizedItems: [MainCategory], selectedStore: String) {
+    ///   - context: The Core Data managed object context.
+    init(categorizedItems: [MainCategory], selectedStore: String, context: NSManagedObjectContext) {
+        self.viewContext = context
         self.storeLayout = StoreLayout.layout(for: selectedStore)
         self.aisleMapping = CategoryMappings.aisleMappings[selectedStore] ?? CategoryMappings.genericAisleMapping
 
@@ -48,12 +54,12 @@ class PathViewModel: ObservableObject {
     /// - Returns: An ordered list of `AisleCategory` representing the optimal shopping path.
     static func computeOptimalPath(from categorizedItems: [MainCategory], with storeLayout: [StoreSection], aisleMapping: [String: String]) -> [AisleCategory] {
         // Flatten all items with their corresponding aisles
-        var aisleToItems: [String: [ShoppingItem]] = [:]
+        var aisleToItems: [String: [CDShoppingItem]] = [:]
 
         for mainCategory in categorizedItems {
             for subCategory in mainCategory.subcategories {
                 let aisleName = aisleMapping[subCategory.name] ?? "Aisle 30: Other"
-                aisleToItems[aisleName, default: []].append(contentsOf: subCategory.items)
+                aisleToItems[aisleName, default: []] += subCategory.items // Use += for appending
             }
         }
 
@@ -98,7 +104,11 @@ class PathViewModel: ObservableObject {
 
         let currentAisleCategory = path[currentAisleIndex]
 
-        let allItemsGrabbedInCurrentAisle = currentAisleCategory.items.allSatisfy { grabbedItems.contains($0.id) }
+        // Ensure item IDs are not nil
+        let allItemsGrabbedInCurrentAisle = currentAisleCategory.items.allSatisfy { item in
+            guard let itemID = item.id else { return false }
+            return grabbedItems.contains(itemID)
+        }
 
         if allItemsGrabbedInCurrentAisle {
             moveToNextAisle()
@@ -135,19 +145,22 @@ class PathViewModel: ObservableObject {
     // MARK: - Item Grabbing Methods
     /// Toggles the grabbed state of a given shopping item.
     /// - Parameter item: The shopping item to toggle.
-    func toggleItemGrabbed(_ item: ShoppingItem) {
-        if grabbedItems.contains(item.id) {
-            grabbedItems.remove(item.id)
+    func toggleItemGrabbed(_ item: CDShoppingItem) {
+        guard let itemID = item.id else { return }
+
+        if grabbedItems.contains(itemID) {
+            grabbedItems.remove(itemID)
         } else {
-            grabbedItems.insert(item.id)
+            grabbedItems.insert(itemID)
         }
     }
 
     /// Checks if a given shopping item has been grabbed.
     /// - Parameter item: The shopping item to check.
     /// - Returns: `true` if the item is grabbed; otherwise, `false`.
-    func isItemGrabbed(_ item: ShoppingItem) -> Bool {
-        grabbedItems.contains(item.id)
+    func isItemGrabbed(_ item: CDShoppingItem) -> Bool {
+        guard let itemID = item.id else { return false }
+        return grabbedItems.contains(itemID)
     }
 
     // MARK: - Current Aisle
@@ -189,5 +202,5 @@ class PathViewModel: ObservableObject {
 struct AisleCategory: Identifiable, Hashable {
     let id = UUID()
     let name: String
-    var items: [ShoppingItem]
+    var items: [CDShoppingItem]
 }

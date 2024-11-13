@@ -16,10 +16,13 @@ public class CDShoppingList: NSManagedObject {
 
 // CDShoppingList+Extensions.swift
 
-import Foundation
-import CoreData
-
 extension CDShoppingList {
+    /// Computed property to get items as a sorted array
+    var itemsArray: [CDShoppingItem] {
+        let set = items as? Set<CDShoppingItem> ?? []
+        return set.sorted { ($0.name ?? "") < ($1.name ?? "") }
+    }
+
     /// Adds a new item to the shopping list
     /// - Parameters:
     ///   - name: Name of the item
@@ -37,7 +40,8 @@ extension CDShoppingList {
     /// Deletes an item from the shopping list
     /// - Parameter item: The item to delete
     func removeItem(_ item: CDShoppingItem, context: NSManagedObjectContext) {
-        self.removeItem(<#T##item: CDShoppingItem##CDShoppingItem#>, context: <#T##NSManagedObjectContext#>) // Correct placement
+        self.removeFromItems(item)
         context.delete(item)
     }
 }
+
