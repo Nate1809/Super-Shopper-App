@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		26752EB82CDF3EE80084406F /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 26752EB72CDF3EE80084406F /* ConfettiSwiftUI */; };
+		26A3C3202CE42111004424D3 /* SuperShopperModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 26A3C31E2CE42111004424D3 /* SuperShopperModel.xcdatamodeld */; };
+		26A3C3252CE42507004424D3 /* CDShoppingList+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A3C3232CE42507004424D3 /* CDShoppingList+CoreDataClass.swift */; };
+		26A3C3272CE42507004424D3 /* CDShoppingItem+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A3C3212CE42507004424D3 /* CDShoppingItem+CoreDataClass.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +34,9 @@
 		268D0B432CCC3ED100F40674 /* Super Shopper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Super Shopper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		268D0B532CCC3ED200F40674 /* Super ShopperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Super ShopperTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		268D0B5D2CCC3ED200F40674 /* Super ShopperUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Super ShopperUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		26A3C31F2CE42111004424D3 /* SuperShopperModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SuperShopperModel.xcdatamodel; sourceTree = "<group>"; };
+		26A3C3212CE42507004424D3 /* CDShoppingItem+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDShoppingItem+CoreDataClass.swift"; sourceTree = "<group>"; };
+		26A3C3232CE42507004424D3 /* CDShoppingList+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDShoppingList+CoreDataClass.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -80,6 +86,9 @@
 		268D0B3A2CCC3ED100F40674 = {
 			isa = PBXGroup;
 			children = (
+				26A3C3212CE42507004424D3 /* CDShoppingItem+CoreDataClass.swift */,
+				26A3C3232CE42507004424D3 /* CDShoppingList+CoreDataClass.swift */,
+				26A3C31E2CE42111004424D3 /* SuperShopperModel.xcdatamodeld */,
 				268D0B452CCC3ED100F40674 /* Super Shopper */,
 				268D0B562CCC3ED200F40674 /* Super ShopperTests */,
 				268D0B602CCC3ED200F40674 /* Super ShopperUITests */,
@@ -245,6 +254,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26A3C3202CE42111004424D3 /* SuperShopperModel.xcdatamodeld in Sources */,
+				26A3C3252CE42507004424D3 /* CDShoppingList+CoreDataClass.swift in Sources */,
+				26A3C3272CE42507004424D3 /* CDShoppingItem+CoreDataClass.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -582,6 +594,19 @@
 			productName = ConfettiSwiftUI;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		26A3C31E2CE42111004424D3 /* SuperShopperModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				26A3C31F2CE42111004424D3 /* SuperShopperModel.xcdatamodel */,
+			);
+			currentVersion = 26A3C31F2CE42111004424D3 /* SuperShopperModel.xcdatamodel */;
+			path = SuperShopperModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 268D0B3B2CCC3ED100F40674 /* Project object */;
 }
