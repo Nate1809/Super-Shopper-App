@@ -1,9 +1,4 @@
-//
-//  NumberFormatterExtension.swift
-//  Super Shopper
-//
-//  Created by Nathan Guzman on 10/25/24.
-//
+// NumberFormatterExtension.swift
 
 import Foundation
 
